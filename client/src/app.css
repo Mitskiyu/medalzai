@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+@font-face {
+	font-family: Inter;
+	src: url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+}
+
+@theme {
+	--color-medal-lime: #bef73f;
+	--color-medal-orange: #fe4a2b;
+	--color-medal-black: #0d0d0d;
+	--color-medal-gray: #1f1f20;
+	--color-medal-lgray: #313131;
+
+	--font-main: "Inter", Helvetica, system-ui;
+}
+
+@layer base {
+	html {
+		background-color: #000;
+	}
+}
