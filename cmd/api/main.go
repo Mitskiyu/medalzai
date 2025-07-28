@@ -32,12 +32,13 @@ func run(ctx context.Context, getenv func(string) string) error {
 	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
+	ao := getenv("ALLOWED_ORIGINS")
 	port := getenv("PORT")
 	if port == "" {
 		port = "3000"
 	}
 
-	s := server.New(port)
+	s := server.New(ao, port)
 
 	go func() {
 		fmt.Printf("Server starting on port %s\n", port)
