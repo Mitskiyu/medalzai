@@ -31,7 +31,7 @@
 </script>
 
 <div
-	class="bg-medal-gray font-main flex h-22 w-full flex-row items-center justify-between gap-x-4 rounded-2xl px-6 py-2 text-lg font-bold text-white"
+	class="bg-medal-gray font-main flex h-22 w-full flex-row items-center justify-between rounded-2xl px-6 py-2 text-lg font-bold text-white"
 >
 	{#each items as item (item.name)}
 		{@const isActive = item.activePath(page.url.pathname)}
@@ -43,9 +43,13 @@
 		{:else}
 			<a
 				href={item.url}
-				class={`flex flex-row items-center gap-x-1 ${isActive ? "text-medal-lime" : "text-white"}`}
+				class={`flex flex-row items-center gap-x-2 hover:opacity-80 ${isActive ? "text-medal-lime" : "text-white"}`}
 			>
-				<item.icon size="28" color={isActive ? "var(--color-medal-lime)" : "white"} />
+				<item.icon
+					size="28"
+					color={isActive ? "var(--color-medal-lime)" : "white"}
+					class="hover:opacity-80"
+				/>
 				<p>{item.name}</p>
 			</a>
 		{/if}
