@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"time"
 )
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +25,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		res, err := http.Get(url)
+		client := http.Client{
+			Timeout: 10 * time.Second,
+		}
+
+		res, err := client.Get(url)
 		if err != nil {
 			http.Error(w, "Could not fetch video: "+url, http.StatusBadGateway)
 			return
