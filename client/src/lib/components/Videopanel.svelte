@@ -1,7 +1,12 @@
 <script lang="ts">
 	import type { Video } from "$lib/types/video";
+	import { saveVideo } from "$lib/video";
 	import { HardDriveDownload } from "@lucide/svelte";
-	let { video } = $props<{ video: Video }>();
+	let { video }: { video: Video } = $props<{ video: Video }>();
+
+	function handleDownload() {
+		saveVideo(video.url, video.title);
+	}
 </script>
 
 <div class="bg-medal-black outline-medal-lgray font-main h-60 rounded-2xl p-4 text-white outline-2">
@@ -11,18 +16,18 @@
 			alt={video.title}
 			class="h-32 w-full flex-shrink-0 rounded-lg object-cover"
 		/>
-		<div class="flex min-h-0 flex-1 flex-col gap-2 truncate">
-			<h3 class="line-clamp-2 text-sm leading-tight font-bold text-white">{video.title}</h3>
-			<div class="mt-auto flex h-8 items-end justify-between">
-				<div class="flex min-w-0 flex-1 flex-col gap-1 text-xs text-white/70">
+		<div class="flex flex-1 flex-col truncate">
+			<h3 class="line-clamp-2 text-base leading-tight font-bold text-white">{video.title}</h3>
+			<div class="mt-2 flex h-8 items-start justify-between">
+				<div class="gap-y-0.1 flex min-w-0 flex-1 flex-col text-sm text-white/70">
 					<h2>{video.username}</h2>
 					<h2>{video.game}</h2>
 				</div>
 				<button
-					class="bg-medal-lime hover:bg-medal-lime/70 ml-3 flex h-full flex-shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-black transition-colors hover:cursor-pointer"
+					class="bg-medal-lime text-medal-black ml-3 flex h-10 items-center gap-2 rounded-3xl p-2 text-sm font-bold transition-colors hover:cursor-pointer hover:opacity-80"
+					onclick={handleDownload}
 				>
-					<HardDriveDownload size={14} />
-					Save
+					<HardDriveDownload size="24" />
 				</button>
 			</div>
 		</div>
