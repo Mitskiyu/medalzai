@@ -1,10 +1,39 @@
 package video
 
 import (
+	"context"
 	"encoding/json"
+	"io"
+	"net/http"
 	"strings"
 	"time"
 )
+
+func processVideo(ctx context.Context, client *http.Client, url string) (Response, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return Response{}, err
+	}
+
+	res, err := client.Do(req)
+	if err != nil {
+		return Response{}, err
+	}
+	defer res.Body.Close()
+
+	body := io.LimitReader(res.Body, 5*1024*1024)
+
+	b, err := io.ReadAll(body)
+	if err != nil {
+		return Response{}, err
+	}
+
+	html := string(b)
+	hd := extract(html)
+	data := parse(hd)
+
+	return data, nil
+}
 
 func parse(hydrationData string) Response {
 	var hd HydrationData
