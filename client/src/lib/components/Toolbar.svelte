@@ -11,7 +11,6 @@
 
 		try {
 			isSaving = true;
-			console.log(videos);
 			await saveZIP(videos);
 		} catch (error) {
 			console.error(error);

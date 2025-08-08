@@ -25,28 +25,47 @@ export async function saveVideo(url: string, filename: string): Promise<void> {
 		throw error;
 	}
 }
+
 export async function saveZIP(videos: Video[]): Promise<void> {
 	if (videos.length === 0) return;
 
 	try {
 		const files: Record<string, Uint8Array> = {};
 
-		for (const video of videos) {
-			const res = await fetch(video.url);
+		const downloads = videos.map(
+			async (
+				video: Video,
+			): Promise<{ video: Video; buffer: Uint8Array; filename: string } | null> => {
+				try {
+					const res = await fetch(video.url);
 
-			if (!res.ok) {
-				console.error(`Failed to fetch ${video.title}: ${res.status}`);
-				continue;
+					if (!res.ok) {
+						console.error(`Could not fetch ${video.url}: ${res.status}`);
+						return null;
+					}
+
+					const buffer = await res.arrayBuffer();
+					return {
+						video,
+						buffer: new Uint8Array(buffer),
+						filename: formatFilename(video.game, video.date, video.username, video.title) + ".mp4",
+					};
+				} catch (error) {
+					console.error(error);
+					return null;
+				}
+			},
+		);
+
+		const results = await Promise.all(downloads);
+
+		for (const result of results) {
+			if (result) {
+				files[result.filename] = result.buffer;
 			}
-
-			const buffer = await res.arrayBuffer();
-			const filename = formatFilename(video.game, video.date, video.username, video.title);
-			const extension = ".mp4";
-
-			files[filename + extension] = new Uint8Array(buffer);
 		}
 
-		const zipped = zipSync(files, { level: 1 });
+		const zipped = zipSync(files, { level: 0 });
 
 		const blob = new Blob([zipped], { type: "application/zip" });
 		const downloadURL = URL.createObjectURL(blob);
