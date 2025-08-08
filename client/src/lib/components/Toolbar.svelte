@@ -1,15 +1,40 @@
 <script lang="ts">
-	import { FileArchive, Trash2, RefreshCcw } from "@lucide/svelte";
+	import { FileArchive, LoaderCircle, Trash2, RefreshCcw } from "@lucide/svelte";
+	import type { Video } from "$lib/types/video.ts";
+	import { saveZIP } from "$lib/video";
+
+	let { videos = [] }: { videos: Video[] } = $props();
+	let isSaving = $state(false);
+
+	async function handleSave() {
+		if (videos.length === 0) return;
+
+		try {
+			isSaving = true;
+			console.log(videos);
+			await saveZIP(videos);
+		} catch (error) {
+			console.error(error);
+		} finally {
+			isSaving = false;
+		}
+	}
 </script>
 
 <div
 	class="bg-medal-gray font-main drop-shadow-medal-lime flex h-22 w-full items-center justify-between rounded-2xl px-4 py-2 drop-shadow-md"
 >
 	<button
-		class="bg-medal-black hover:text-medal-lime outline-medal-lgray flex h-16 items-center gap-1.5 rounded-4xl px-4 py-1.5 text-base font-bold text-white outline-2 transition-colors hover:cursor-pointer"
+		class="bg-medal-black hover:text-medal-lime outline-medal-lgray flex h-16 w-46 items-center justify-center gap-1.5 rounded-4xl px-4 py-1.5 text-base font-bold text-white outline-2 transition duration-200 ease-in-out hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+		onclick={handleSave}
+		disabled={isSaving}
 	>
-		<FileArchive size="24" />
-		Save all as <span class="text-medal-lime">.zip</span>
+		{#if isSaving}
+			<LoaderCircle size="24" class="text-medal-lime animate-spin" />
+		{:else}
+			<FileArchive size="24" />
+			Save all as <span class="text-medal-lime">.zip</span>
+		{/if}
 	</button>
 	<div class="flex">
 		<button
