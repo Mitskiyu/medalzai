@@ -1,12 +1,22 @@
 <script lang="ts">
+	import { HardDriveDownload, LoaderCircle } from "@lucide/svelte";
 	import type { Video } from "$lib/types/video";
 	import { formatFilename, saveVideo } from "$lib/video";
-	import { HardDriveDownload } from "@lucide/svelte";
 	let { video }: { video: Video } = $props<{ video: Video }>();
+	let isSaving = $state(false);
 
-	function handleDownload() {
-		const filename = formatFilename(video.game, video.date, video.username, video.title);
-		saveVideo(video.url, filename);
+	async function handleSave() {
+		if (!video) return;
+
+		try {
+			isSaving = true;
+			const filename = formatFilename(video.game, video.date, video.username, video.title);
+			await saveVideo(video.url, filename);
+		} catch (error) {
+			console.error(error);
+		} finally {
+			isSaving = false;
+		}
 	}
 </script>
 
@@ -25,10 +35,15 @@
 					<h2>{video.game}</h2>
 				</div>
 				<button
-					class="bg-medal-lime text-medal-black ml-3 flex h-10 items-center gap-2 rounded-3xl p-2 text-sm font-bold transition-colors hover:cursor-pointer hover:opacity-80"
-					onclick={handleDownload}
+					class="bg-medal-lime text-medal-black ml-3 flex h-10 items-center gap-2 rounded-3xl p-2 text-sm font-bold transition-colors hover:cursor-pointer hover:opacity-80 disabled:cursor-not-allowed"
+					onclick={handleSave}
+					disabled={isSaving}
 				>
-					<HardDriveDownload size="24" />
+					{#if isSaving}
+						<LoaderCircle size="24" class="animate-spin" />
+					{:else}
+						<HardDriveDownload size="24" />
+					{/if}
 				</button>
 			</div>
 		</div>
