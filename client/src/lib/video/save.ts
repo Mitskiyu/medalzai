@@ -22,3 +22,20 @@ export async function saveVideo(url: string, filename: string): Promise<void> {
 		throw error;
 	}
 }
+
+export function formatFilename(game: string, date: string, name: string, title: string): string {
+	const dateObj = new Date(date);
+	const yymmdd =
+		dateObj.getFullYear().toString().slice(-2) +
+		(dateObj.getMonth() + 1).toString().padStart(2, "0") +
+		dateObj.getDate().toString().padStart(2, "0");
+
+	const formattedTitle = title.replace(/\s+/g, "-");
+
+	const base = `${game.toUpperCase()}_${yymmdd}_${name}_`;
+	const maxLength = 200 - base.length;
+
+	return (
+		base + (formattedTitle.length > maxLength ? formattedTitle.slice(0, maxLength) : formattedTitle)
+	);
+}

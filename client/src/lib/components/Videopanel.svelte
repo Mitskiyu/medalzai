@@ -1,11 +1,12 @@
 <script lang="ts">
 	import type { Video } from "$lib/types/video";
-	import { saveVideo } from "$lib/video";
+	import { formatFilename, saveVideo } from "$lib/video";
 	import { HardDriveDownload } from "@lucide/svelte";
 	let { video }: { video: Video } = $props<{ video: Video }>();
 
 	function handleDownload() {
-		saveVideo(video.url, video.title);
+		const filename = formatFilename(video.game, video.date, video.username, video.title);
+		saveVideo(video.url, filename);
 	}
 </script>
 
