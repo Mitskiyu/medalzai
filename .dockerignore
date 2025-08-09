@@ -1,0 +1,8 @@
+client/
+.git/
+*.md
+.air.toml
+.gitignore
+.dockerignore
+docker-compose.yml
+Dockerfile
