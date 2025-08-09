@@ -14,12 +14,13 @@ func New(ao, port string) *http.Server {
 	r.Use(middleware.Logger)
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{ao},
-		AllowedMethods:   []string{"POST"},
+		AllowedMethods:   []string{"GET", "POST"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: false,
 		MaxAge:           300,
 	}))
+	r.Get("/api/video/proxy", video.Proxy)
 	r.Post("/api/video", video.Handler)
 
 	s := http.Server{

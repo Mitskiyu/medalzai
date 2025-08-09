@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"net/url"
 	"sync"
 	"time"
 )
@@ -63,4 +65,39 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(results)
+}
+
+func Proxy(w http.ResponseWriter, r *http.Request) {
+	videoURL := r.URL.Query().Get("url")
+	if videoURL == "" {
+		http.Error(w, "Invalid parameter", http.StatusBadRequest)
+		return
+	}
+
+	parsedURL, err := url.Parse(videoURL)
+	if err != nil || parsedURL.Host != "cdn.medal.tv" {
+		http.Error(w, "Invalid URL: "+videoURL, http.StatusBadRequest)
+		return
+	}
+
+	res, err := http.Get(videoURL)
+	if err != nil {
+		http.Error(w, "Could not fetch video", http.StatusInternalServerError)
+		return
+	}
+	defer res.Body.Close()
+
+	for key, values := range res.Header {
+		for _, value := range values {
+			w.Header().Add(key, value)
+		}
+	}
+
+	w.WriteHeader(res.StatusCode)
+
+	_, err = io.Copy(w, res.Body)
+	if err != nil {
+		fmt.Printf("Error streaming video: %v\n", err)
+		return
+	}
 }

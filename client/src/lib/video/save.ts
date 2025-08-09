@@ -1,9 +1,11 @@
+import { PUBLIC_API_URL } from "$env/static/public";
 import { zipSync } from "fflate";
 import type { Video } from "$lib/types/video.ts";
 
 export async function saveVideo(url: string, filename: string): Promise<void> {
 	try {
-		const res = await fetch(url);
+		const proxy = `${PUBLIC_API_URL}/api/video/proxy?url=${encodeURIComponent(url)}`;
+		const res = await fetch(proxy);
 
 		if (!res.ok) {
 			throw new Error(`Could not fetch ${url}: ${res.status}`);
@@ -37,7 +39,8 @@ export async function saveZIP(videos: Video[]): Promise<void> {
 				video: Video,
 			): Promise<{ video: Video; buffer: Uint8Array; filename: string } | null> => {
 				try {
-					const res = await fetch(video.url);
+					const proxy = `${PUBLIC_API_URL}/api/video/proxy?url=${encodeURIComponent(video.url)}`;
+					const res = await fetch(proxy);
 
 					if (!res.ok) {
 						console.error(`Could not fetch ${video.url}: ${res.status}`);
