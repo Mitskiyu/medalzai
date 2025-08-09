@@ -2,9 +2,32 @@
 	let { inputText = $bindable(), areaFocused = $bindable() } = $props();
 	function handleBlur() {
 		areaFocused = false;
+		cleanText();
 	}
+
 	function handleFocus() {
 		areaFocused = true;
+	}
+
+	function cleanText() {
+		if (!inputText) return;
+		let urls = [];
+		const lines = inputText.split("\n");
+
+		for (let line of lines) {
+			line = line.trim();
+			if (line.length === 0) continue;
+
+			const separated = line.replace(/https:\/\/medal\.tv\//g, "\nhttps://medal.tv/").trim();
+			const foundUrls = separated.split("\n").filter((url: string) => url.length > 0);
+
+			urls.push(...foundUrls);
+		}
+
+		const newText = urls.join("\n");
+		if (newText !== inputText) {
+			inputText = newText;
+		}
 	}
 </script>
 
