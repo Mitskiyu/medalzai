@@ -3,8 +3,17 @@
 	import type { Video } from "$lib/types/video.ts";
 	import { saveZIP } from "$lib/video";
 
-	let { videos = [] }: { videos: Video[] } = $props();
+	let {
+		videos = [],
+		clearAll,
+		refreshAll,
+	}: {
+		videos: Video[];
+		clearAll: () => void;
+		refreshAll: () => Promise<void>;
+	} = $props();
 	let isSaving = $state(false);
+	let isRefreshing = $state(false);
 
 	async function handleSave() {
 		if (videos.length === 0) return;
@@ -17,6 +26,16 @@
 		} finally {
 			isSaving = false;
 		}
+	}
+
+	function handleClear() {
+		clearAll();
+	}
+
+	async function handleRefresh() {
+		isRefreshing = true;
+		await refreshAll();
+		isRefreshing = false;
 	}
 </script>
 
@@ -38,13 +57,20 @@
 	<div class="flex">
 		<button
 			class="bg-medal-lime hover:bg-medal-lime/70 ml-3 flex h-12 items-center gap-1.5 rounded-4xl px-3 py-1.5 text-base font-bold transition-colors hover:cursor-pointer"
+			onclick={handleClear}
 		>
 			<Trash2 size="24" />
 		</button>
 		<button
-			class="bg-medal-lime hover:bg-medal-lime/70 ml-3 flex h-12 items-center gap-1.5 rounded-4xl px-3 py-1.5 text-base font-bold transition-colors hover:cursor-pointer"
+			class="bg-medal-lime hover:bg-medal-lime/70 ml-3 flex h-12 items-center gap-1.5 rounded-4xl px-3 py-1.5 text-base font-bold transition-colors hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+			onclick={handleRefresh}
+			disabled={isRefreshing}
 		>
-			<RefreshCcw size="24" />
+			{#if isRefreshing}
+				<LoaderCircle size="24" class="animate-spin" />
+			{:else}
+				<RefreshCcw size="24" />
+			{/if}
 		</button>
 	</div>
 </div>
