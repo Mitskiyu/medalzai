@@ -53,6 +53,7 @@
 				}
 			});
 		} catch (error) {
+			toast.error("Something went wrong, try again later");
 			console.error("Failed to fetch videos: ", error);
 			newUrls.forEach((url) => {
 				urlStatus[url.trim()] = "failed";
