@@ -36,7 +36,7 @@
 		class="bg-medal-black outline-medal-lgray focus-within:outline-medal-orange h-60 w-full rounded-2xl p-4 outline-2 transition duration-200 ease-in-out focus-within:outline-2"
 	>
 		<textarea
-			class="h-full w-full resize-none overflow-x-auto overflow-y-auto bg-transparent font-mono whitespace-nowrap text-white outline-none"
+			class="font-main h-full w-full resize-none overflow-x-auto overflow-y-auto bg-transparent whitespace-nowrap text-white outline-none"
 			style="scrollbar-width: thin; scrollbar-color: #4b5563 transparent;"
 			id="input"
 			bind:value={inputText}
