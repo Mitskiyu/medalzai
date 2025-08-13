@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"sync"
 	"time"
 )
@@ -74,13 +73,27 @@ func Proxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	parsedURL, err := url.Parse(videoURL)
-	if err != nil || parsedURL.Host != "cdn.medal.tv" {
-		http.Error(w, "Invalid URL: "+videoURL, http.StatusBadRequest)
+	client := &http.Client{
+		Timeout: 60 * time.Second,
+		Transport: &http.Transport{
+			MaxIdleConns:        100,
+			MaxIdleConnsPerHost: 20,
+			IdleConnTimeout:     90 * time.Second,
+			DisableCompression:  true,
+			WriteBufferSize:     64 * 1024,
+			ReadBufferSize:      64 * 1024,
+		},
+	}
+
+	req, err := http.NewRequest("GET", videoURL, nil)
+	if err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
 
-	res, err := http.Get(videoURL)
+	req.Header.Set("User-Agent", r.Header.Get("User-Agent"))
+
+	res, err := client.Do(req)
 	if err != nil {
 		http.Error(w, "Could not fetch video", http.StatusInternalServerError)
 		return
@@ -95,9 +108,8 @@ func Proxy(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(res.StatusCode)
 
-	_, err = io.Copy(w, res.Body)
+	_, err = io.CopyBuffer(w, res.Body, make([]byte, 32*1024))
 	if err != nil {
 		fmt.Printf("Error streaming video: %v\n", err)
-		return
 	}
 }
