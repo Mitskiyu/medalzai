@@ -35,7 +35,7 @@ func run(ctx context.Context, getenv func(string) string) error {
 	ao := getenv("ALLOWED_ORIGINS")
 	port := getenv("PORT")
 	if port == "" {
-		port = "3000"
+		port = "8080"
 	}
 
 	s := server.New(ao, port)
