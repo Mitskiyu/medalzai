@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { toast } from "svelte-sonner";
 	import type { Video } from "$lib/types/video.ts";
 	import { fetchVideos, validate } from "$lib/video";
 	import { Linkarea, Videopanel, Toolbar } from "$lib/components";
@@ -6,6 +7,7 @@
 	let inputText = $state<string>("");
 	let areaFocused = $state<boolean>(false);
 	let videos = $state<Video[]>([]);
+	let urlStatus = $state<Record<string, "processing" | "done" | "failed">>({});
 
 	function clearAll() {
 		videos = [];
@@ -13,36 +15,57 @@
 		areaFocused = false;
 	}
 
-	async function refreshAll() {
+	async function handleFetch(clear: boolean = false) {
 		if (!inputText.trim()) return;
 
 		const urls = inputText.split("\n").filter((url) => url.trim());
 		const valid = validate(urls);
 		if (!valid) return;
 
-		videos = [];
+		const newUrls = clear ? urls : urls.filter((url) => !urlStatus[url.trim()]);
+		if (newUrls.length === 0) return;
+
+		if (clear) {
+			videos = [];
+			urlStatus = {};
+		}
+
 		try {
-			const videoData = await fetchVideos(urls);
-			videos = videoData;
+			newUrls.forEach((url) => {
+				urlStatus[url.trim()] = "processing";
+			});
+
+			const data = await fetchVideos(newUrls);
+			data.forEach((video, i) => {
+				const currentUrl = newUrls[i].trim();
+
+				if (!video.url) {
+					setTimeout(() => {
+						toast.error(
+							`Could not find video, make sure URL is valid and clip is public: ${currentUrl}`,
+						);
+					}, 50);
+					console.log(`Could not fetch video for: ${currentUrl}`);
+					urlStatus[currentUrl] = "failed";
+				} else {
+					videos.push(video);
+					urlStatus[currentUrl] = "done";
+				}
+			});
 		} catch (error) {
-			console.error("Failed to refresh videos:", error);
+			console.error("Failed to fetch videos: ", error);
+			newUrls.forEach((url) => {
+				urlStatus[url.trim()] = "failed";
+			});
 		}
 	}
 
-	$effect(() => {
-		if (!areaFocused && inputText.trim()) {
-			const urls = inputText.split("\n");
-			const valid = validate(urls);
-			if (!valid) return;
+	async function refreshAll() {
+		await handleFetch(true);
+	}
 
-			fetchVideos(urls)
-				.then((videoData) => {
-					videos = videoData;
-				})
-				.catch((error) => {
-					console.error("Failed to fetch videos:", error);
-				});
-		}
+	$effect(() => {
+		if (!areaFocused && inputText.trim()) handleFetch();
 	});
 </script>
 
