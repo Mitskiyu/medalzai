@@ -35,7 +35,7 @@
 					<h2>{video.game}</h2>
 				</div>
 				<button
-					class="bg-medal-lime text-medal-black ml-3 flex h-10 items-center gap-2 rounded-3xl p-2 text-sm font-bold transition-colors hover:cursor-pointer hover:opacity-80 disabled:cursor-not-allowed"
+					class="bg-medal-lime text-medal-black ml-3 flex h-10 items-center gap-2 rounded-3xl p-2 text-sm font-bold transition-colors hover:cursor-pointer hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40"
 					onclick={handleSave}
 					disabled={isSaving}
 				>

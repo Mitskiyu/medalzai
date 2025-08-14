@@ -55,7 +55,7 @@
 	<button
 		class="bg-medal-black hover:text-medal-lime outline-medal-lgray flex h-16 w-46 items-center justify-center gap-1.5 rounded-4xl px-4 py-1.5 text-base font-bold text-white outline-2 transition duration-300 ease-in-out hover:-translate-y-0.5 hover:cursor-pointer disabled:cursor-not-allowed"
 		onclick={handleSave}
-		disabled={isSaving}
+		disabled={isRefreshing || isSaving}
 	>
 		{#if isSaving}
 			<div class="flex w-full flex-col items-center gap-1">
@@ -79,15 +79,16 @@
 	</button>
 	<div class="flex">
 		<button
-			class="bg-medal-lime hover:bg-medal-lime/70 ml-3 flex h-12 items-center gap-1.5 rounded-4xl px-3 py-1.5 text-base font-bold transition-colors hover:cursor-pointer"
+			class="bg-medal-lime hover:bg-medal-lime/70 ml-3 flex h-12 items-center gap-1.5 rounded-4xl px-3 py-1.5 text-base font-bold transition-colors hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
 			onclick={handleClear}
+			disabled={isRefreshing || isSaving}
 		>
 			<Trash2 size="24" />
 		</button>
 		<button
 			class="bg-medal-lime hover:bg-medal-lime/70 ml-3 flex h-12 items-center gap-1.5 rounded-4xl px-3 py-1.5 text-base font-bold transition-colors hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
 			onclick={handleRefresh}
-			disabled={isRefreshing}
+			disabled={isRefreshing || isSaving}
 		>
 			{#if isRefreshing}
 				<LoaderCircle size="24" class="animate-spin" />
