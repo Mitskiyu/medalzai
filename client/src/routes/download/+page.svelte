@@ -67,7 +67,9 @@
 					console.log(`Could not fetch video for: ${currentUrl}`);
 					urlStatus[currentUrl] = "failed";
 				} else {
-					videoState.videos.push(video);
+					if (!videoState.videos.some((existingVideo) => existingVideo.url === video.url)) {
+						videoState.videos.push(video);
+					}
 					urlStatus[currentUrl] = "done";
 				}
 			});
