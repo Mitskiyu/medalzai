@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { SvelteSet } from "svelte/reactivity";
 	import { toast } from "svelte-sonner";
 	import type { Video } from "$lib/types/video.ts";
 	import { fetchVideos, validate } from "$lib/video";
@@ -17,8 +18,19 @@
 
 	async function handleFetch(clear: boolean = false) {
 		if (!inputText.trim()) return;
-
-		const urls = inputText.split("\n").filter((url) => url.trim());
+		const seen = new SvelteSet();
+		const urls = inputText
+			.split("\n")
+			.filter((url) => url.trim())
+			.filter((url) => {
+				const base = url.split("?")[0];
+				if (seen.has(base)) {
+					console.log(`Removed duplicate link: ${url}`);
+					return false;
+				}
+				seen.add(base);
+				return true;
+			});
 		const valid = validate(urls);
 		if (!valid) return;
 
