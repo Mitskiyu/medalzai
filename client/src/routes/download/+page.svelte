@@ -17,7 +17,6 @@
 
 	async function handleFetch(refresh: boolean = false) {
 		if (!videoState.inputText.trim() || isLoading) return;
-		isLoading = true;
 
 		const seen = new SvelteSet();
 		const urls = videoState.inputText
@@ -32,12 +31,20 @@
 				seen.add(base);
 				return true;
 			});
+
 		const valid = validate(urls);
-		if (!valid) return;
+		if (!valid) {
+			isLoading = false;
+			return;
+		}
 
 		const newUrls = refresh ? urls : urls.filter((url) => !urlStatus[url.trim()]);
-		if (newUrls.length === 0) return;
+		if (newUrls.length === 0) {
+			isLoading = false;
+			return;
+		}
 
+		isLoading = true;
 		if (refresh) {
 			videoState.videos = [];
 			urlStatus = {};
@@ -51,7 +58,6 @@
 			const data = await fetchVideos(newUrls);
 			data.forEach((video, i) => {
 				const currentUrl = newUrls[i].trim();
-
 				if (!video.url) {
 					setTimeout(() => {
 						toast.error(
@@ -71,6 +77,8 @@
 			newUrls.forEach((url) => {
 				urlStatus[url.trim()] = "failed";
 			});
+		} finally {
+			isLoading = false;
 		}
 	}
 
@@ -82,6 +90,7 @@
 		videoState.videos = [];
 		videoState.inputText = "";
 		areaFocused = false;
+		isLoading = false;
 		urlStatus = {};
 	}
 </script>
@@ -94,7 +103,7 @@
 		<Linkarea bind:inputText={videoState.inputText} bind:areaFocused />
 	</div>
 	<div class="grid grid-cols-2 gap-4">
-		{#each videoState.videos as video (video.url)}
+		{#each videoState.videos as video, i (video.url + i)}
 			<div>
 				<Videopanel {video} />
 			</div>
