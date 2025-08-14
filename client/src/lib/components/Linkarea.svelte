@@ -1,8 +1,11 @@
 <script lang="ts">
 	let { inputText = $bindable(), areaFocused = $bindable() } = $props();
+
 	function handleBlur() {
 		areaFocused = false;
-		cleanText();
+		if (inputText && inputText.trim()) {
+			cleanText();
+		}
 	}
 
 	function handleFocus() {

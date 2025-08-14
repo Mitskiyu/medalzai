@@ -1,25 +1,26 @@
 <script lang="ts">
 	import { SvelteSet } from "svelte/reactivity";
 	import { toast } from "svelte-sonner";
-	import type { Video } from "$lib/types/video.ts";
+	import { videoState } from "$lib/state/index.svelte";
 	import { fetchVideos, validate } from "$lib/video";
 	import { Linkarea, Videopanel, Toolbar } from "$lib/components";
 
-	let inputText = $state<string>("");
+	let isLoading = $state<boolean>(false);
 	let areaFocused = $state<boolean>(false);
-	let videos = $state<Video[]>([]);
 	let urlStatus = $state<Record<string, "processing" | "done" | "failed">>({});
 
-	function clearAll() {
-		videos = [];
-		inputText = "";
-		areaFocused = false;
-	}
+	$effect(() => {
+		if (!areaFocused && videoState.inputText.trim() && !isLoading) {
+			handleFetch();
+		}
+	});
 
-	async function handleFetch(clear: boolean = false) {
-		if (!inputText.trim()) return;
+	async function handleFetch(refresh: boolean = false) {
+		if (!videoState.inputText.trim() || isLoading) return;
+		isLoading = true;
+
 		const seen = new SvelteSet();
-		const urls = inputText
+		const urls = videoState.inputText
 			.split("\n")
 			.filter((url) => url.trim())
 			.filter((url) => {
@@ -34,11 +35,11 @@
 		const valid = validate(urls);
 		if (!valid) return;
 
-		const newUrls = clear ? urls : urls.filter((url) => !urlStatus[url.trim()]);
+		const newUrls = refresh ? urls : urls.filter((url) => !urlStatus[url.trim()]);
 		if (newUrls.length === 0) return;
 
-		if (clear) {
-			videos = [];
+		if (refresh) {
+			videoState.videos = [];
 			urlStatus = {};
 		}
 
@@ -60,7 +61,7 @@
 					console.log(`Could not fetch video for: ${currentUrl}`);
 					urlStatus[currentUrl] = "failed";
 				} else {
-					videos.push(video);
+					videoState.videos.push(video);
 					urlStatus[currentUrl] = "done";
 				}
 			});
@@ -77,32 +78,26 @@
 		await handleFetch(true);
 	}
 
-	$effect(() => {
-		if (!areaFocused && inputText.trim()) handleFetch();
-	});
+	function clearAll() {
+		videoState.videos = [];
+		videoState.inputText = "";
+		areaFocused = false;
+		urlStatus = {};
+	}
 </script>
 
 <div class="mt-8">
 	<div class="-mt-6 mb-6">
-		<Toolbar {videos} {clearAll} {refreshAll} />
+		<Toolbar videos={videoState.videos} {clearAll} {refreshAll} />
 	</div>
-	{#if videos.length < 1}
-		<Linkarea bind:inputText bind:areaFocused />
-	{:else}
-		<div class="grid grid-cols-2 gap-4">
+	<div class="mb-4">
+		<Linkarea bind:inputText={videoState.inputText} bind:areaFocused />
+	</div>
+	<div class="grid grid-cols-2 gap-4">
+		{#each videoState.videos as video (video.url)}
 			<div>
-				<Videopanel video={videos[0]} />
+				<Videopanel {video} />
 			</div>
-			<div>
-				<Linkarea bind:inputText bind:areaFocused />
-			</div>
-			{#if videos.length > 1}
-				{#each videos.slice(1) as video, i (videos[i])}
-					<div>
-						<Videopanel {video} />
-					</div>
-				{/each}
-			{/if}
-		</div>
-	{/if}
+		{/each}
+	</div>
 </div>
