@@ -1,13 +1,17 @@
 import type { Video } from "$lib/types/video";
 
 interface AppState {
-	redirected: boolean;
 	videos: Video[];
 	inputText: string;
+	areaFocused: boolean;
+	goingLeft: boolean;
+	previousPath: string;
 }
 
 export const appState = $state<AppState>({
-	redirected: false,
 	videos: [],
 	inputText: "",
+	areaFocused: false,
+	goingLeft: false,
+	previousPath: "",
 });

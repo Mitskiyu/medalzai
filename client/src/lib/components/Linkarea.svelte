@@ -1,8 +1,16 @@
 <script lang="ts">
+	import { page } from "$app/state";
+	import { goto } from "$app/navigation";
+
 	let { inputText = $bindable(), areaFocused = $bindable() } = $props();
 
 	function handleBlur() {
 		areaFocused = false;
+
+		if (page.url.pathname === "/" && inputText && inputText.trim()) {
+			goto("/download");
+		}
+
 		if (inputText && inputText.trim()) {
 			cleanText();
 		}

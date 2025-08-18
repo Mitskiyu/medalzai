@@ -6,11 +6,10 @@
 	import { Linkarea, Videopanel, Toolbar } from "$lib/components";
 
 	let isLoading = $state<boolean>(false);
-	let areaFocused = $state<boolean>(false);
 	let urlStatus = $state<Record<string, "processing" | "done" | "failed">>({});
 
 	$effect(() => {
-		if (!areaFocused && appState.inputText.trim() && !isLoading) {
+		if (!appState.areaFocused && appState.inputText.trim() && !isLoading) {
 			handleFetch();
 		}
 	});
@@ -91,7 +90,7 @@
 	function clearAll() {
 		appState.videos = [];
 		appState.inputText = "";
-		areaFocused = false;
+		appState.areaFocused = false;
 		isLoading = false;
 		urlStatus = {};
 	}
@@ -102,7 +101,7 @@
 		<Toolbar videos={appState.videos} {clearAll} {refreshAll} />
 	</div>
 	<div class="mb-4">
-		<Linkarea bind:inputText={appState.inputText} bind:areaFocused />
+		<Linkarea bind:inputText={appState.inputText} bind:areaFocused={appState.areaFocused} />
 	</div>
 	<div class="grid grid-cols-2 gap-4">
 		{#each appState.videos as video, i (video.url + i)}
