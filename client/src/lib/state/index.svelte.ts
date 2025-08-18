@@ -1,11 +1,13 @@
 import type { Video } from "$lib/types/video";
 
-interface VideoState {
+interface AppState {
+	redirected: boolean;
 	videos: Video[];
 	inputText: string;
 }
 
-export const videoState = $state<VideoState>({
+export const appState = $state<AppState>({
+	redirected: false,
 	videos: [],
 	inputText: "",
 });
