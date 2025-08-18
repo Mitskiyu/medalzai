@@ -34,7 +34,7 @@
 	});
 </script>
 
-<div class="mx-auto mt-8 mb-4 min-h-screen max-w-xl px-4">
+<div class="mx-auto min-h-screen max-w-xl px-4 pt-8 pb-4">
 	<Toaster richColors toastOptions={{ class: "whitespace-pre-line" }} />
 	<Navbar />
 	<div class="grid flex-grow grid-cols-1 grid-rows-1">
