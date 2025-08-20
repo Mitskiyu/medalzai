@@ -101,11 +101,16 @@ func Proxy(w http.ResponseWriter, r *http.Request) {
 	defer res.Body.Close()
 
 	for key, values := range res.Header {
+		if key == "Cache-Control" || key == "Expires" || key == "Pragma" {
+			continue
+		}
 		for _, value := range values {
 			w.Header().Add(key, value)
 		}
 	}
-
+	w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
+	w.Header().Set("Pragma", "no-cache")
+	w.Header().Set("Expires", "0")
 	w.WriteHeader(res.StatusCode)
 
 	_, err = io.CopyBuffer(w, res.Body, make([]byte, 32*1024))
