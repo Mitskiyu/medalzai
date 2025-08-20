@@ -1,10 +1,12 @@
 <script lang="ts">
 	import "../app.css";
+	import { onMount } from "svelte";
 	import { page } from "$app/state";
+	import { browser } from "$app/environment";
 	import { fly } from "svelte/transition";
 	import { quintOut } from "svelte/easing";
 	import { Toaster } from "svelte-sonner";
-	import { appState } from "$lib/state/index.svelte";
+	import { appState, settingsState } from "$lib/state/index.svelte";
 	import { Navbar } from "$lib/components";
 
 	let { children } = $props();
@@ -25,6 +27,26 @@
 		}
 
 		return false;
+	});
+
+	onMount(() => {
+		if (browser) {
+			const stored = localStorage.getItem("settings");
+			if (stored) {
+				try {
+					const parsed = JSON.parse(stored);
+					Object.assign(settingsState, parsed);
+				} catch (error) {
+					console.error("Could not parse stored settings: ", error);
+				}
+			}
+		}
+	});
+
+	$effect(() => {
+		if (browser) {
+			localStorage.setItem("settings", JSON.stringify(settingsState));
+		}
 	});
 
 	$effect(() => {

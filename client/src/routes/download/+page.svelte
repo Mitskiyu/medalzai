@@ -1,83 +1,82 @@
 <script lang="ts">
-	import { SvelteSet } from "svelte/reactivity";
 	import { toast } from "svelte-sonner";
-	import { appState } from "$lib/state/index.svelte";
-	import { fetchVideos, validate } from "$lib/video";
+	import type { Video } from "$lib/types/video";
+	import { appState, settingsState } from "$lib/state/index.svelte";
+	import { fetchVideos } from "$lib/video";
 	import { Linkarea, Videopanel, Toolbar } from "$lib/components";
 
 	let isLoading = $state<boolean>(false);
-	let urlStatus = $state<Record<string, "processing" | "done" | "failed">>({});
+	let areaFocused = $state<boolean>(false);
+	let processedUrls = $state<Set<string>>(new Set());
+	let processedCount = $state<number>(0);
 
 	$effect(() => {
-		if (!appState.areaFocused && appState.inputText.trim() && !isLoading) {
+		if (appState.urls.length > 0 && appState.videos.length === 0 && !isLoading) {
 			handleFetch();
 		}
 	});
 
+	function handleAreaChange() {
+		if (!areaFocused && !isLoading) {
+			handleFetch();
+		}
+	}
+
+	function handleInvalidUrl(url: string) {
+		toast.error(`Automatically removed invalid Medal link: ${url}`);
+	}
+
+	function handleDuplicatesRemoved(count: number, duplicates: string[]) {
+		toast.info(
+			`Automatically filtered ${count} duplicate link${count > 1 ? "s" : ""} - toggle in Settings to disable`,
+		);
+		duplicates.forEach((url) => {
+			console.log(`Duplicate removed: ${url}`);
+		});
+	}
+
 	async function handleFetch(refresh: boolean = false) {
-		if (!appState.inputText.trim() || isLoading) return;
+		if (appState.urls.length === 0 || isLoading) return;
 
-		const seen = new SvelteSet();
-		const urls = appState.inputText
-			.split("\n")
-			.filter((url) => url.trim())
-			.filter((url) => {
-				const base = url.split("?")[0];
-				if (seen.has(base)) {
-					console.log(`Removed duplicate link: ${url}`);
-					return false;
-				}
-				seen.add(base);
-				return true;
-			});
+		const newUrls = refresh
+			? appState.urls
+			: settingsState.allowDuplicates
+				? appState.urls.slice(processedCount)
+				: appState.urls.filter((url) => !processedUrls.has(url));
 
-		const valid = validate(urls);
-		if (!valid) {
-			isLoading = false;
-			return;
-		}
-
-		const newUrls = refresh ? urls : urls.filter((url) => !urlStatus[url.trim()]);
-		if (newUrls.length === 0) {
-			isLoading = false;
-			return;
-		}
+		if (newUrls.length === 0) return;
 
 		isLoading = true;
 		if (refresh) {
 			appState.videos = [];
-			urlStatus = {};
+			processedUrls.clear();
+			processedCount = 0;
 		}
 
 		try {
-			newUrls.forEach((url) => {
-				urlStatus[url.trim()] = "processing";
-			});
-
 			const data = await fetchVideos(newUrls);
 			data.forEach((video, i) => {
-				const currentUrl = newUrls[i].trim();
+				const currentUrl = newUrls[i];
 				if (!video.url) {
-					setTimeout(() => {
-						toast.error(
-							`Could not find video, make sure URL is valid and clip is public: ${currentUrl}`,
-						);
-					}, 50);
-					console.log(`Could not fetch video for: ${currentUrl}`);
-					urlStatus[currentUrl] = "failed";
+					toast.error(
+						`Could not find video, make sure link is valid and clip is public: ${currentUrl}`,
+					);
 				} else {
-					if (!appState.videos.some((existingVideo) => existingVideo.url === video.url)) {
-						appState.videos.push(video);
-					}
-					urlStatus[currentUrl] = "done";
+					const appVideo: Video = {
+						id: crypto.randomUUID(),
+						...video,
+					};
+					appState.videos.push(appVideo);
+					processedUrls.add(currentUrl);
 				}
 			});
+
+			if (settingsState.allowDuplicates) {
+				processedCount = appState.urls.length;
+			}
 		} catch (error) {
 			toast.error("Something went wrong, try again later");
 			console.error("Failed to fetch videos: ", error);
-			newUrls.forEach((url) => {
-				urlStatus[url.trim()] = "failed";
-			});
 		} finally {
 			isLoading = false;
 		}
@@ -89,10 +88,10 @@
 
 	function clearAll() {
 		appState.videos = [];
-		appState.inputText = "";
-		appState.areaFocused = false;
+		appState.urls = [];
 		isLoading = false;
-		urlStatus = {};
+		processedUrls.clear();
+		processedCount = 0;
 	}
 </script>
 
@@ -101,10 +100,16 @@
 		<Toolbar videos={appState.videos} {clearAll} {refreshAll} />
 	</div>
 	<div class="mb-4">
-		<Linkarea bind:inputText={appState.inputText} bind:areaFocused={appState.areaFocused} />
+		<Linkarea
+			bind:inputText={appState.inputText}
+			bind:areaFocused
+			onAreaChange={handleAreaChange}
+			onInvalidUrl={handleInvalidUrl}
+			onDuplicatesRemoved={handleDuplicatesRemoved}
+		/>
 	</div>
 	<div class="grid grid-cols-2 gap-4">
-		{#each appState.videos as video, i (video.url + i)}
+		{#each appState.videos as video (video.id)}
 			<div>
 				<Videopanel {video} />
 			</div>

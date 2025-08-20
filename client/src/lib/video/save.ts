@@ -21,6 +21,7 @@ export async function saveZIP(
 	if (videos.length === 0) return;
 
 	const files: Record<string, Uint8Array> = {};
+	const used = new Set<string>();
 	const total = videos.length + 1;
 	let done = 0;
 
@@ -40,9 +41,21 @@ export async function saveZIP(
 				const buffer = await res.arrayBuffer();
 				done++;
 				onProgress(done, total);
+
+				let filename = formatFilename(video.game, video.date, video.username, video.title);
+				let count = 1;
+
+				while (used.has(filename)) {
+					filename =
+						formatFilename(video.game, video.date, video.username, video.title) + `_${count}`;
+					count++;
+				}
+
+				used.add(filename);
+
 				return {
 					buffer: new Uint8Array(buffer),
-					filename: formatFilename(video.game, video.date, video.username, video.title) + ".mp4",
+					filename: filename + ".mp4",
 				};
 			} catch (error) {
 				done++;

@@ -1,44 +1,55 @@
 <script lang="ts">
 	import { page } from "$app/state";
 	import { goto } from "$app/navigation";
+	import { appState, settingsState } from "$lib/state/index.svelte";
+	import { processUrls } from "$lib/video";
 
-	let { inputText = $bindable(), areaFocused = $bindable() } = $props();
+	let {
+		inputText = $bindable(),
+		areaFocused = $bindable(),
+		onAreaChange = null,
+		onInvalidUrl = null,
+		onDuplicatesRemoved = null,
+	} = $props<{
+		inputText: string;
+		areaFocused: boolean;
+		onAreaChange?: (() => void) | null;
+		onInvalidUrl?: ((url: string) => void) | null;
+		onDuplicatesRemoved?: ((count: number, duplicates: string[]) => void) | null;
+	}>();
+
+	function processInput() {
+		const processed = processUrls(inputText, settingsState.allowDuplicates);
+
+		processed.invalidUrls.forEach((url) => {
+			onInvalidUrl?.(url);
+		});
+
+		if (processed.duplicateUrls.length > 0) {
+			onDuplicatesRemoved?.(processed.duplicateUrls.length, processed.duplicateUrls);
+		}
+
+		appState.urls = processed.validUrls;
+		onAreaChange?.();
+
+		if (processed.cleanText !== inputText) {
+			inputText = processed.cleanText;
+		}
+	}
 
 	function handleBlur() {
 		areaFocused = false;
-
-		if (page.url.pathname === "/" && inputText && inputText.trim()) {
+		if (page.url.pathname === "/" && inputText.trim()) {
 			goto("/download");
 		}
 
-		if (inputText && inputText.trim()) {
-			cleanText();
+		if (inputText.trim()) {
+			processInput();
 		}
 	}
 
 	function handleFocus() {
 		areaFocused = true;
-	}
-
-	function cleanText() {
-		if (!inputText) return;
-		let urls = [];
-		const lines = inputText.split("\n");
-
-		for (let line of lines) {
-			line = line.trim();
-			if (line.length === 0) continue;
-
-			const separated = line.replace(/https:\/\/medal\.tv\//g, "\nhttps://medal.tv/").trim();
-			const foundUrls = separated.split("\n").filter((url: string) => url.length > 0);
-
-			urls.push(...foundUrls);
-		}
-
-		const newText = urls.join("\n");
-		if (newText !== inputText) {
-			inputText = newText;
-		}
 	}
 </script>
 

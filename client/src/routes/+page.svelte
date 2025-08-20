@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { appState } from "$lib/state/index.svelte";
 	import { Linkarea } from "$lib/components";
+
+	let areaFocused = $state<boolean>(false);
 </script>
 
 <div class="mt-16 flex flex-col items-center justify-center font-bold text-white">
@@ -12,5 +14,5 @@
 	</h2>
 </div>
 <div class="mt-8 w-full">
-	<Linkarea bind:inputText={appState.inputText} bind:areaFocused={appState.areaFocused} />
+	<Linkarea bind:inputText={appState.inputText} bind:areaFocused />
 </div>
