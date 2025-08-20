@@ -2,7 +2,8 @@ import type { Video } from "$lib/types/video";
 
 interface AppState {
 	inputText: string;
-	urls: string[];
+	validUrls: string[];
+	fetchedUrls: string[];
 	videos: Video[];
 	goingLeft: boolean;
 	previousPath: string;
@@ -14,7 +15,8 @@ interface SettingsState {
 
 export const appState = $state<AppState>({
 	inputText: "",
-	urls: [],
+	validUrls: [],
+	fetchedUrls: [],
 	videos: [],
 	goingLeft: false,
 	previousPath: "",

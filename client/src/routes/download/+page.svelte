@@ -7,11 +7,9 @@
 
 	let isLoading = $state<boolean>(false);
 	let areaFocused = $state<boolean>(false);
-	let processedUrls = $state<Set<string>>(new Set());
-	let processedCount = $state<number>(0);
 
 	$effect(() => {
-		if (appState.urls.length > 0 && appState.videos.length === 0 && !isLoading) {
+		if (appState.validUrls.length > 0 && appState.videos.length === 0 && !isLoading) {
 			handleFetch();
 		}
 	});
@@ -36,27 +34,35 @@
 	}
 
 	async function handleFetch(refresh: boolean = false) {
-		if (appState.urls.length === 0 || isLoading) return;
+		if (appState.validUrls.length === 0 || isLoading) return;
 
-		const newUrls = refresh
-			? appState.urls
-			: settingsState.allowDuplicates
-				? appState.urls.slice(processedCount)
-				: appState.urls.filter((url) => !processedUrls.has(url));
+		let unfetchedUrls: string[];
 
-		if (newUrls.length === 0) return;
+		if (refresh) {
+			unfetchedUrls = appState.validUrls;
+		} else if (settingsState.allowDuplicates) {
+			const fetchedCount = appState.fetchedUrls.length;
+			unfetchedUrls = appState.validUrls.slice(fetchedCount);
+		} else {
+			unfetchedUrls = appState.validUrls.filter((url) => !appState.fetchedUrls.includes(url));
+		}
+
+		if (unfetchedUrls.length === 0) {
+			return;
+		}
 
 		isLoading = true;
+
 		if (refresh) {
 			appState.videos = [];
-			processedUrls.clear();
-			processedCount = 0;
+			appState.fetchedUrls = [];
 		}
 
 		try {
-			const data = await fetchVideos(newUrls);
+			const data = await fetchVideos(unfetchedUrls);
+
 			data.forEach((video, i) => {
-				const currentUrl = newUrls[i];
+				const currentUrl = unfetchedUrls[i];
 				if (!video.url) {
 					toast.error(
 						`Could not find video, make sure link is valid and clip is public: ${currentUrl}`,
@@ -67,13 +73,9 @@
 						...video,
 					};
 					appState.videos.push(appVideo);
-					processedUrls.add(currentUrl);
+					appState.fetchedUrls.push(currentUrl);
 				}
 			});
-
-			if (settingsState.allowDuplicates) {
-				processedCount = appState.urls.length;
-			}
 		} catch (error) {
 			toast.error("Something went wrong, try again later");
 			console.error("Failed to fetch videos: ", error);
@@ -88,10 +90,10 @@
 
 	function clearAll() {
 		appState.videos = [];
-		appState.urls = [];
+		appState.validUrls = [];
+		appState.fetchedUrls = [];
+		appState.inputText = "";
 		isLoading = false;
-		processedUrls.clear();
-		processedCount = 0;
 	}
 </script>
 

@@ -29,7 +29,7 @@
 			onDuplicatesRemoved?.(processed.duplicateUrls.length, processed.duplicateUrls);
 		}
 
-		appState.urls = processed.validUrls;
+		appState.validUrls = processed.validUrls;
 		onAreaChange?.();
 
 		if (processed.cleanText !== inputText) {
