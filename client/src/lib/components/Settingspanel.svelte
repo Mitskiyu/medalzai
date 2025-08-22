@@ -23,8 +23,8 @@
 		</div>
 		<div class="flex w-full gap-3">
 			<button
-				onclick={() => setAllowDuplicates(true)}
-				class="{settingsState.allowDuplicates ? 'bg-medal-orange' : 'bg-medal-lgray text-white'} 
+				onclick={() => setAllowDuplicates(false)}
+				class="{!settingsState.allowDuplicates ? 'bg-medal-orange' : 'bg-medal-lgray text-white'} 
                flex flex-1 flex-row items-center justify-center gap-2 rounded-lg p-4 text-black transition-all
                duration-200 hover:scale-105 hover:cursor-pointer active:scale-95"
 			>
@@ -32,8 +32,8 @@
 				<span>Enable</span>
 			</button>
 			<button
-				onclick={() => setAllowDuplicates(false)}
-				class="{!settingsState.allowDuplicates ? 'bg-medal-orange' : 'bg-medal-lgray text-white'} 
+				onclick={() => setAllowDuplicates(true)}
+				class="{settingsState.allowDuplicates ? 'bg-medal-orange' : 'bg-medal-lgray text-white'} 
                flex flex-1 flex-row items-center justify-center gap-2 rounded-lg p-4 text-black transition-all
                duration-200 hover:scale-105 hover:cursor-pointer active:scale-95"
 			>
