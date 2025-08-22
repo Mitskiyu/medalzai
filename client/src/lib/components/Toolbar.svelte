@@ -3,6 +3,7 @@
 	import { FileArchive, LoaderCircle, Trash2, RefreshCcw } from "@lucide/svelte";
 	import type { Video } from "$lib/types/video.ts";
 	import { saveZIP } from "$lib/video";
+	import { appState } from "$lib/state/index.svelte";
 
 	let {
 		videos = [],
@@ -14,27 +15,21 @@
 		refreshAll: () => Promise<void>;
 	} = $props();
 
-	let isSaving = $state(false);
 	let isRefreshing = $state(false);
-	let zipProgress = $state({ current: 0, total: 0 });
 
 	const progressPercent = $derived(
-		zipProgress.total > 0 ? (zipProgress.current / zipProgress.total) * 100 : null,
+		appState.zipProgress.total > 0
+			? (appState.zipProgress.current / appState.zipProgress.total) * 100
+			: null,
 	);
 
 	async function handleSave() {
 		if (videos.length === 0) return;
 		try {
-			isSaving = true;
-			await saveZIP(videos, (current, total) => {
-				zipProgress = { current, total };
-			});
+			await saveZIP(videos);
 		} catch (error) {
 			toast.error("Could not create ZIP file, try again later");
 			console.error(error);
-		} finally {
-			isSaving = false;
-			zipProgress = { current: 0, total: 0 };
 		}
 	}
 
@@ -55,12 +50,12 @@
 	<button
 		class="bg-medal-black hover:text-medal-lime outline-medal-lgray flex h-16 w-46 items-center justify-center gap-1.5 rounded-4xl px-4 py-1.5 text-base font-bold text-white outline-2 transition duration-300 ease-in-out hover:-translate-y-0.5 hover:cursor-pointer disabled:cursor-not-allowed"
 		onclick={handleSave}
-		disabled={isRefreshing || isSaving}
+		disabled={isRefreshing || appState.zipProgress.isActive}
 	>
-		{#if isSaving}
+		{#if appState.zipProgress.isActive}
 			<div class="flex w-full flex-col items-center gap-1">
 				<span class="text-sm text-white">
-					{Math.min(zipProgress.current, videos.length)}/{videos.length}
+					{Math.min(appState.zipProgress.current, videos.length)}/{videos.length}
 				</span>
 				<div class="bg-medal-gray relative h-1 w-full overflow-hidden rounded-full">
 					<div
@@ -81,14 +76,14 @@
 		<button
 			class="bg-medal-lime hover:bg-medal-lime/70 ml-3 flex h-12 items-center gap-1.5 rounded-4xl px-3 py-1.5 text-base font-bold transition-colors hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
 			onclick={handleClear}
-			disabled={isRefreshing || isSaving}
+			disabled={isRefreshing || appState.zipProgress.isActive}
 		>
 			<Trash2 size="24" />
 		</button>
 		<button
 			class="bg-medal-lime hover:bg-medal-lime/70 ml-3 flex h-12 items-center gap-1.5 rounded-4xl px-3 py-1.5 text-base font-bold transition-colors hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
 			onclick={handleRefresh}
-			disabled={isRefreshing || isSaving}
+			disabled={isRefreshing || appState.zipProgress.isActive}
 		>
 			{#if isRefreshing}
 				<LoaderCircle size="24" class="animate-spin" />

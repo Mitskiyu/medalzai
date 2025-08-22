@@ -1,7 +1,7 @@
 import { PUBLIC_API_URL } from "$env/static/public";
 import { zipSync } from "fflate";
 import type { Video } from "$lib/types/video.ts";
-import { settingsState } from "$lib/state/index.svelte";
+import { appState, settingsState } from "$lib/state/index.svelte";
 
 export async function saveVideo(url: string, filename: string): Promise<void> {
 	const proxy = `${PUBLIC_API_URL}/api/video/proxy?url=${encodeURIComponent(url)}`;
@@ -15,16 +15,18 @@ export async function saveVideo(url: string, filename: string): Promise<void> {
 	downloadBlob(blob, filename);
 }
 
-export async function saveZIP(
-	videos: Video[],
-	onProgress: (current: number, total: number) => void,
-): Promise<void> {
+export async function saveZIP(videos: Video[]): Promise<void> {
 	if (videos.length === 0) return;
 
+	appState.zipProgress = {
+		isActive: true,
+		current: 0,
+		total: videos.length + 1,
+	};
+
+	const filename = `Medal_Videos_${videos.length}.zip`;
 	const files: Record<string, Uint8Array> = {};
 	const used = new Set<string>();
-	const total = videos.length + 1;
-	let done = 0;
 
 	const downloads = videos.map(
 		async (video: Video): Promise<{ buffer: Uint8Array; filename: string } | null> => {
@@ -33,15 +35,13 @@ export async function saveZIP(
 				const res = await fetch(proxy);
 
 				if (!res.ok) {
-					done++;
-					onProgress(done, total);
+					appState.zipProgress.current++;
 					console.error(`Could not fetch ${video.url}: ${res.status}`);
 					return null;
 				}
 
 				const buffer = await res.arrayBuffer();
-				done++;
-				onProgress(done, total);
+				appState.zipProgress.current++;
 
 				let filename = formatFilename(video.game, video.date, video.username, video.title);
 				let count = 1;
@@ -59,29 +59,36 @@ export async function saveZIP(
 					filename: filename + ".mp4",
 				};
 			} catch (error) {
-				done++;
-				onProgress(done, total);
+				appState.zipProgress.current++;
 				console.error(error);
 				return null;
 			}
 		},
 	);
 
-	const results = await Promise.all(downloads);
+	try {
+		const results = await Promise.all(downloads);
 
-	for (const result of results) {
-		if (result) {
-			files[result.filename] = result.buffer;
+		for (const result of results) {
+			if (result) {
+				files[result.filename] = result.buffer;
+			}
 		}
+
+		const zipped = zipSync(files, { level: 0 });
+		appState.zipProgress.current++;
+
+		const blob = new Blob([zipped], { type: "application/zip" });
+		downloadBlob(blob, filename);
+	} catch (error) {
+		console.error("ZIP creation failed:", error);
+	} finally {
+		appState.zipProgress = {
+			isActive: false,
+			current: 0,
+			total: 0,
+		};
 	}
-
-	const zipped = zipSync(files, { level: 0 });
-	done++;
-	onProgress(done, total);
-
-	const blob = new Blob([zipped], { type: "application/zip" });
-	const filename = `Medal_Videos_${videos.length}.zip`;
-	downloadBlob(blob, filename);
 }
 
 export function formatFilename(game: string, date: string, name: string, title: string): string {

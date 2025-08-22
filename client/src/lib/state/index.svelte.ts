@@ -7,6 +7,11 @@ interface AppState {
 	videos: Video[];
 	goingLeft: boolean;
 	previousPath: string;
+	zipProgress: {
+		isActive: boolean;
+		current: number;
+		total: number;
+	};
 }
 
 interface SettingsState {
@@ -21,6 +26,11 @@ export const appState = $state<AppState>({
 	videos: [],
 	goingLeft: false,
 	previousPath: "",
+	zipProgress: {
+		isActive: false,
+		current: 0,
+		total: 0,
+	},
 });
 
 export const settingsState = $state<SettingsState>({
