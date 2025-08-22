@@ -14,6 +14,10 @@
 		}
 	});
 
+	function handleRemove(videoId: string) {
+		appState.videos = appState.videos.filter((v) => v.id !== videoId);
+	}
+
 	function handleAreaChange() {
 		if (!areaFocused && !isLoading) {
 			handleFetch();
@@ -113,7 +117,7 @@
 	<div class="grid grid-cols-2 gap-4">
 		{#each appState.videos as video (video.id)}
 			<div>
-				<Videopanel {video} />
+				<Videopanel {video} onRemove={() => handleRemove(video.id)} />
 			</div>
 		{/each}
 	</div>
