@@ -46,27 +46,30 @@
 		<div class="flex flex-col gap-2 pt-3">
 			<h5 class="font-semibold">Customize Filename Format</h5>
 			<p class="text-sm text-white/60">
-				Sets the downloaded file's name (not including the extension). You can use the following
-				templates to format the file name:
+				Customize how your downloaded video files are named using these templates:
 			</p>
 			<ul class="list-inside list-disc text-sm text-white/60">
-				<li><code>%game%</code> – the clip category</li>
-				<li><code>%date%</code> – the clip's upload date</li>
-				<li><code>%name%</code> – the clip uploader's Medal username</li>
-				<li><code>%title%</code> – the clip title</li>
+				<li><code>%game%</code> – game name</li>
+				<li><code>%date%</code> – clip upload date in <span class="italic">YYMMDD</span> format</li>
+				<li><code>%name%</code> – uploader's Medal username</li>
+				<li><code>%title%</code> – clip title</li>
 			</ul>
-			<input
-				type="text"
-				bind:value={settingsState.filenameFormat}
-				placeholder="%game%_%date%_%name%_%title%"
-				class="font-main bg-medal-lgray focus:ring-medal-orange flex-1 rounded-xl p-2
-         text-base transition duration-200
-         placeholder:italic focus:ring-2 focus:outline-none"
-			/>
-			<p class="text-sm text-white/60">
-				Note that the max filename length is 200 characters, any characters that exceed will be
-				truncated.
-			</p>
+			<div class="relative">
+				<input
+					type="text"
+					bind:value={settingsState.filenameFormat}
+					placeholder="%game%_%date%_%name%_%title%"
+					class="font-main bg-medal-lgray focus:ring-medal-orange w-full rounded-xl p-2 pr-16
+	         text-base transition duration-200
+	         placeholder:italic focus:ring-2 focus:outline-none"
+				/>
+				<div
+					class="bg-medal-orange absolute top-1/2 right-2 -translate-y-1/2 transform rounded px-2 py-1 text-sm text-black"
+				>
+					.mp4
+				</div>
+			</div>
+			<p class="text-sm text-white/60">Filenames are limited to 200 characters total</p>
 		</div>
 	</div>
 </div>

@@ -103,8 +103,8 @@ export function formatFilename(game: string, date: string, name: string, title: 
 		.replace(/%name%/g, cleanName)
 		.replace(/%title%/g, cleanTitle);
 
-	if (filename.length > 200) {
-		filename = filename.slice(0, 200);
+	if (filename.length > 196) {
+		filename = filename.slice(0, 196);
 	}
 
 	return filename;
