@@ -1,6 +1,7 @@
 import { PUBLIC_API_URL } from "$env/static/public";
 import { zipSync } from "fflate";
 import type { Video } from "$lib/types/video.ts";
+import { settingsState } from "$lib/state/index.svelte";
 
 export async function saveVideo(url: string, filename: string): Promise<void> {
 	const proxy = `${PUBLIC_API_URL}/api/video/proxy?url=${encodeURIComponent(url)}`;
@@ -90,14 +91,23 @@ export function formatFilename(game: string, date: string, name: string, title: 
 		(dateObj.getMonth() + 1).toString().padStart(2, "0") +
 		dateObj.getDate().toString().padStart(2, "0");
 
-	const formattedTitle = title.replace(/\s+/g, "-");
+	const cleanGame = game.toUpperCase().replace(/[^a-zA-Z0-9]/g, "");
+	const cleanName = name.replace(/[^a-zA-Z0-9]/g, "");
+	const cleanTitle = title.replace(/\s+/g, "-").replace(/[^a-zA-Z0-9-]/g, "");
 
-	const base = `${game.toUpperCase()}_${yymmdd}_${name}_`;
-	const maxLength = 200 - base.length;
+	const format = settingsState.filenameFormat.trim() || "%game%_%date%_%name%_%title%";
 
-	return (
-		base + (formattedTitle.length > maxLength ? formattedTitle.slice(0, maxLength) : formattedTitle)
-	);
+	let filename = format
+		.replace(/%game%/g, cleanGame)
+		.replace(/%date%/g, yymmdd)
+		.replace(/%name%/g, cleanName)
+		.replace(/%title%/g, cleanTitle);
+
+	if (filename.length > 200) {
+		filename = filename.slice(0, 200);
+	}
+
+	return filename;
 }
 
 function downloadBlob(blob: Blob, filename: string): void {

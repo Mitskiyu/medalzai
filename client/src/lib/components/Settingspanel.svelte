@@ -14,10 +14,12 @@
 		</div>
 		<h3 class="text-2xl font-semibold">Saving</h3>
 	</div>
-	<div class="flex flex-col gap-4">
+	<div class="mt-1 flex flex-col gap-4">
 		<div class="flex flex-col gap-1 pt-3">
-			<h5 class="font-semibold">Duplicate downloads</h5>
-			<p class="text-sm text-white/60">Allow or prevent duplicate file downloads</p>
+			<h5 class="font-semibold">Duplicate Downloads</h5>
+			<p class="text-sm text-white/60">
+				Automatically filter duplicate links, to prevent downloading the same video twice
+			</p>
 		</div>
 		<div class="flex w-full gap-3">
 			<button
@@ -38,6 +40,33 @@
 				<X size="22" strokeWidth="3" />
 				<span>Disable</span>
 			</button>
+		</div>
+	</div>
+	<div class="mt-1 flex flex-col gap-4">
+		<div class="flex flex-col gap-2 pt-3">
+			<h5 class="font-semibold">Customize Filename Format</h5>
+			<p class="text-sm text-white/60">
+				Sets the downloaded file's name (not including the extension). You can use the following
+				templates to format the file name:
+			</p>
+			<ul class="list-inside list-disc text-sm text-white/60">
+				<li><code>%game%</code> – the clip category</li>
+				<li><code>%date%</code> – the clip's upload date</li>
+				<li><code>%name%</code> – the clip uploader's Medal username</li>
+				<li><code>%title%</code> – the clip title</li>
+			</ul>
+			<input
+				type="text"
+				bind:value={settingsState.filenameFormat}
+				placeholder="%game%_%date%_%name%_%title%"
+				class="font-main bg-medal-lgray focus:ring-medal-orange flex-1 rounded-xl p-2
+         text-base transition duration-200
+         placeholder:italic focus:ring-2 focus:outline-none"
+			/>
+			<p class="text-sm text-white/60">
+				Note that the max filename length is 200 characters, any characters that exceed will be
+				truncated.
+			</p>
 		</div>
 	</div>
 </div>

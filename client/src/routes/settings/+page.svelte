@@ -8,7 +8,7 @@
 		<Settings2 size="52" color="white" />
 		<h1 class="text-4xl font-bold text-white">Settings</h1>
 	</div>
-	<div class="mt-2">
+	<div class="mt-6">
 		<Settingspanel />
 	</div>
 </div>

@@ -11,6 +11,7 @@ interface AppState {
 
 interface SettingsState {
 	allowDuplicates: boolean;
+	filenameFormat: string;
 }
 
 export const appState = $state<AppState>({
@@ -24,4 +25,5 @@ export const appState = $state<AppState>({
 
 export const settingsState = $state<SettingsState>({
 	allowDuplicates: false,
+	filenameFormat: "%game%_%date%_%name%_%title%",
 });
