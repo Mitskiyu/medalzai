@@ -1,57 +1,57 @@
 <script lang="ts">
 	import { page } from "$app/state";
-	import { Download, Settings2, Info } from "@lucide/svelte";
+	import { Download, Settings2, Info, type Icon as IconType } from "@lucide/svelte";
 	import Medal from "../icons/Medal.svelte";
-	const items = [
-		{
-			name: "Medal",
-			url: "/",
-			activePath: (pathname: string) => pathname === "/",
-			icon: Medal,
-		},
+
+	type item = {
+		name: string;
+		href: string;
+		activePath: (pathname: string) => boolean;
+		icon: typeof IconType;
+	};
+
+	const items: item[] = [
 		{
 			name: "Download",
-			url: "/download",
+			href: "/download",
 			activePath: (pathname: string) => pathname === "/download",
 			icon: Download,
 		},
 		{
 			name: "Settings",
-			url: "/settings",
+			href: "/settings",
 			activePath: (pathname: string) => pathname === "/settings",
 			icon: Settings2,
 		},
 		{
 			name: "About",
-			url: "/about",
+			href: "/about",
 			activePath: (pathname: string) => pathname === "/about",
 			icon: Info,
 		},
 	];
+
+	let home = $derived(page.url.pathname === "/");
 </script>
 
 <div
-	class="bg-medal-gray font-main flex h-22 w-full flex-row items-center justify-between rounded-2xl px-6 py-2 text-lg font-bold text-white"
+	class="bg-medal-gray font-main flex h-18 w-full flex-row items-center justify-between rounded-2xl px-4 py-2 text-lg font-bold text-white sm:h-22 sm:px-6"
 >
-	{#each items as item (item.name)}
-		{@const isActive = item.activePath(page.url.pathname)}
+	<a href="/" class="hover:opacity-80">
+		<Medal
+			className={`${home ? "text-medal-lime" : "text-white"} size-13 sm:h-16 sm:w-16 hover:opacity-80`}
+		/>
+	</a>
 
-		{#if item.name === "Medal"}
-			<a href={item.url}>
-				<item.icon iconSize="68" iconColor={isActive ? "var(--color-medal-lime)" : "white"} />
-			</a>
-		{:else}
-			<a
-				href={item.url}
-				class={`flex flex-row items-center gap-x-2 hover:opacity-80 ${isActive ? "text-medal-lime" : "text-white"}`}
-			>
-				<item.icon
-					size="28"
-					color={isActive ? "var(--color-medal-lime)" : "white"}
-					class="hover:opacity-80"
-				/>
-				<p>{item.name}</p>
-			</a>
-		{/if}
+	{#each items as item (item.name)}
+		{@const Icon = item.icon}
+		{@const isActive = item.activePath(page.url.pathname)}
+		<a
+			href={item.href}
+			class={`flex flex-row items-center gap-x-2 hover:opacity-80 ${isActive ? "text-medal-lime" : "text-white"}`}
+		>
+			<Icon class="size-8" />
+			<span class="hidden sm:block">{item.name}</span>
+		</a>
 	{/each}
 </div>

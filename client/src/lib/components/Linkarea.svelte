@@ -55,10 +55,10 @@
 
 <div class="font-main relative text-white">
 	<div
-		class="bg-medal-black outline-medal-lgray focus-within:outline-medal-orange h-60 w-full rounded-2xl p-4 outline-2 transition duration-200 ease-in-out focus-within:outline-2"
+		class="bg-medal-black outline-medal-lgray focus-within:outline-medal-orange h-40 w-full rounded-2xl p-4 outline-2 transition duration-200 ease-in-out focus-within:outline-2 sm:h-60"
 	>
 		<textarea
-			class="font-main h-full w-full resize-none overflow-x-auto overflow-y-auto bg-transparent whitespace-nowrap text-white outline-none"
+			class="font-main h-full w-full resize-none overflow-x-auto overflow-y-auto bg-transparent text-sm whitespace-nowrap text-white outline-none sm:text-base"
 			style="scrollbar-width: thin; scrollbar-color: #4b5563 transparent;"
 			id="input"
 			bind:value={inputText}
@@ -68,7 +68,10 @@
 		></textarea>
 	</div>
 	{#if !inputText && !areaFocused}
-		<label class="pointer-events-none absolute top-4 left-4 font-bold" for="input">
+		<label
+			class="pointer-events-none absolute top-4 left-4 text-sm font-bold sm:text-base"
+			for="input"
+		>
 			Paste your <span class="text-medal-lime">links</span> here, separated by a line
 		</label>
 	{/if}

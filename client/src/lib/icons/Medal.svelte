@@ -1,12 +1,13 @@
 <script lang="ts">
-	const { iconSize, iconColor } = $props();
+	const { className } = $props();
 </script>
 
 <svg
-	width={iconSize}
-	height={iconSize}
+	class={className}
+	width="60"
+	height="60"
 	viewBox="0 0 294 174"
-	fill={iconColor}
+	fill="currentColor"
 	xmlns="http://www.w3.org/2000/svg"
 >
 	<path

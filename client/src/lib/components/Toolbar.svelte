@@ -45,19 +45,19 @@
 </script>
 
 <div
-	class="bg-medal-gray font-main drop-shadow-medal-lime flex h-22 w-full items-center justify-between rounded-2xl px-4 py-2 drop-shadow-md"
+	class="bg-medal-gray font-main drop-shadow-medal-lime flex h-18 w-full items-center justify-between rounded-2xl px-4 py-2 drop-shadow-md sm:h-22 sm:px-6"
 >
 	<button
-		class="bg-medal-black hover:text-medal-lime outline-medal-lgray flex h-16 w-46 items-center justify-center gap-1.5 rounded-4xl px-4 py-1.5 text-base font-bold text-white outline-2 transition duration-300 ease-in-out hover:-translate-y-0.5 hover:cursor-pointer disabled:cursor-not-allowed"
+		class="bg-medal-black hover:text-medal-lime outline-medal-lgray flex h-10 w-40 items-center justify-center gap-1.5 rounded-4xl py-4 text-sm font-bold text-white outline-2 transition duration-300 ease-in-out hover:-translate-y-0.5 hover:cursor-pointer disabled:cursor-not-allowed sm:h-16 sm:w-46 sm:px-4 sm:text-base"
 		onclick={handleSave}
 		disabled={isRefreshing || appState.zipProgress.isActive}
 	>
 		{#if appState.zipProgress.isActive}
 			<div class="flex w-full flex-col items-center gap-1">
-				<span class="text-sm text-white">
+				<span class="text-xs text-white sm:text-sm">
 					{Math.min(appState.zipProgress.current, videos.length)}/{videos.length}
 				</span>
-				<div class="bg-medal-gray relative h-1 w-full overflow-hidden rounded-full">
+				<div class="bg-medal-gray relative h-1 w-3/4 overflow-hidden rounded-full sm:w-full">
 					<div
 						class="bg-medal-orange absolute top-0 left-0 h-full"
 						class:progress-animation={progressPercent === null}
@@ -68,27 +68,27 @@
 				</div>
 			</div>
 		{:else}
-			<FileArchive size="24" />
-			Save all as <span class="text-medal-lime">.zip</span>
+			<FileArchive class="size-5 sm:size-8" />
+			<span>Save all as <span class="text-medal-lime">.zip</span></span>
 		{/if}
 	</button>
-	<div class="flex">
+	<div class="flex gap-2 sm:gap-3">
 		<button
-			class="bg-medal-lime hover:bg-medal-lime/70 ml-3 flex h-12 items-center gap-1.5 rounded-4xl px-3 py-1.5 text-base font-bold transition-colors hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+			class="bg-medal-lime hover:bg-medal-lime/70 flex size-10 items-center justify-center rounded-4xl text-base font-bold transition-colors hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 sm:h-12 sm:w-12"
 			onclick={handleClear}
 			disabled={isRefreshing || appState.zipProgress.isActive}
 		>
-			<Trash2 size="24" />
+			<Trash2 class="size-5 sm:size-8" />
 		</button>
 		<button
-			class="bg-medal-lime hover:bg-medal-lime/70 ml-3 flex h-12 items-center gap-1.5 rounded-4xl px-3 py-1.5 text-base font-bold transition-colors hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+			class="bg-medal-lime hover:bg-medal-lime/70 flex size-10 items-center justify-center rounded-4xl text-base font-bold transition-colors hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 sm:h-12 sm:w-12"
 			onclick={handleRefresh}
 			disabled={isRefreshing || appState.zipProgress.isActive}
 		>
 			{#if isRefreshing}
-				<LoaderCircle size="24" class="animate-spin" />
+				<LoaderCircle class="size-5 animate-spin sm:size-8" />
 			{:else}
-				<RefreshCcw size="24" />
+				<RefreshCcw class="size-5 sm:size-8" />
 			{/if}
 		</button>
 	</div>
