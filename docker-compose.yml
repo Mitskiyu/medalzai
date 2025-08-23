@@ -1,6 +1,8 @@
 services:
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: cmd/api/Dockerfile
     expose:
       - "${PORT:-8080}"
     environment:
