@@ -7,11 +7,11 @@ export function processUrls(
 	duplicateUrls: string[];
 	cleanText: string;
 } {
-	const urls = extractUrls(inputText);
+	const separatedText = separateUrls(inputText);
 
+	const urls = cleanUrls(separatedText);
 	const validUrls: string[] = [];
 	const invalidUrls: string[] = [];
-
 	urls.forEach((url: string): void => {
 		if (isValid(url)) {
 			validUrls.push(url);
@@ -19,10 +19,8 @@ export function processUrls(
 			invalidUrls.push(url);
 		}
 	});
-
 	let finalUrls: string[] = [];
 	let duplicateUrls: string[] = [];
-
 	if (allowDuplicates) {
 		finalUrls = validUrls;
 	} else {
@@ -35,11 +33,24 @@ export function processUrls(
 		validUrls: finalUrls,
 		invalidUrls,
 		duplicateUrls,
-		cleanText: finalUrls.join("\n"),
+		cleanText: separatedText,
 	};
 }
 
-function extractUrls(inputText: string): string[] {
+function separateUrls(inputText: string): string {
+	if (!inputText) return "";
+
+	const lines = inputText.split("\n");
+	const processedLines = lines.map((line) => {
+		if (line.trim().length === 0) return line;
+		const separated = line.replace(/https:\/\/medal\.tv\//g, "\nhttps://medal.tv/");
+		return separated.replace(/^\n/, "");
+	});
+
+	return processedLines.join("\n");
+}
+
+function cleanUrls(inputText: string): string[] {
 	if (!inputText) return [];
 
 	const urls: string[] = [];
@@ -49,12 +60,10 @@ function extractUrls(inputText: string): string[] {
 		line = line.trim();
 		if (line.length === 0) continue;
 
-		const separated = line.replace(/https:\/\/medal\.tv\//g, "\nhttps://medal.tv/").trim();
-		const extractedUrls = separated
-			.split("\n")
-			.map((url: string): string => url.trim())
-			.filter((url: string): boolean => url.length > 0);
-		urls.push(...extractedUrls);
+		const cleanUrl = line.replace(/[",\s]*$/, "");
+		if (cleanUrl.length > 0) {
+			urls.push(cleanUrl);
+		}
 	}
 
 	return urls;
