@@ -4,7 +4,7 @@ import type { Video } from "$lib/types/video.ts";
 import { appState, settingsState } from "$lib/state/index.svelte";
 
 export async function saveVideo(url: string, filename: string): Promise<void> {
-	const proxy = `${PUBLIC_API_URL}/api/video/proxy?url=${encodeURIComponent(url)}`;
+	const proxy = `${PUBLIC_API_URL}/proxy?url=${encodeURIComponent(url)}`;
 	const res = await fetch(proxy);
 
 	if (!res.ok) {
@@ -31,7 +31,7 @@ export async function saveZIP(videos: Video[]): Promise<void> {
 	const downloads = videos.map(
 		async (video: Video): Promise<{ buffer: Uint8Array; filename: string } | null> => {
 			try {
-				const proxy = `${PUBLIC_API_URL}/api/video/proxy?url=${encodeURIComponent(video.url)}`;
+				const proxy = `${PUBLIC_API_URL}/proxy?url=${encodeURIComponent(video.url)}`;
 				const res = await fetch(proxy);
 
 				if (!res.ok) {

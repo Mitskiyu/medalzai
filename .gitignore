@@ -9,6 +9,7 @@ node_modules
 .svelte-kit
 build
 tmp/
+target/
 
 # os
 .DS_Store

@@ -1,6 +1,6 @@
 import { PUBLIC_API_URL } from "$env/static/public";
 
-interface VideoResponse {
+interface Metadata {
 	username: string;
 	title: string;
 	game: string;
@@ -9,9 +9,9 @@ interface VideoResponse {
 	thumbnail: string;
 }
 
-export async function fetchVideos(urls: string[]): Promise<VideoResponse[]> {
+export async function fetchVideos(urls: string[]): Promise<Metadata[]> {
 	try {
-		const res = await fetch(`${PUBLIC_API_URL}/api/video`, {
+		const res = await fetch(`${PUBLIC_API_URL}/metadata`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
