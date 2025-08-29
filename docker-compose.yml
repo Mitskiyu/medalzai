@@ -1,13 +1,13 @@
 services:
   api:
     build:
-      context: .
-      dockerfile: cmd/api/Dockerfile
-    expose:
-      - "${PORT:-8080}"
+      context: ./server
     environment:
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
-      - PORT=${PORT}
+    expose:
+      - "3000"
+    networks:
+      - app-network
 
   client:
     build:
@@ -21,3 +21,9 @@ services:
       - PORT=3000
     depends_on:
       - api
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

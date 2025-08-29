@@ -1,7 +1,12 @@
-.git/
 *.md
+*.log
+**/.env
+.git/
 .air.toml
 .gitignore
 .dockerignore
 docker-compose.yml
 Dockerfile
+server/target/
+client/node_modules/
+client/.svelte-kit/
