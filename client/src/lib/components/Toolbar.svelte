@@ -68,7 +68,7 @@
 				</div>
 			</div>
 		{:else}
-			<FileArchive class="size-5 sm:size-8" />
+			<FileArchive class="size-5 sm:size-6" />
 			<span>Save all as <span class="text-medal-lime">.zip</span></span>
 		{/if}
 	</button>
@@ -78,7 +78,7 @@
 			onclick={handleClear}
 			disabled={isRefreshing || appState.zipProgress.isActive}
 		>
-			<Trash2 class="size-5 sm:size-8" />
+			<Trash2 class="size-5 sm:size-6" />
 		</button>
 		<button
 			class="bg-medal-lime hover:bg-medal-lime/70 flex size-10 items-center justify-center rounded-4xl text-base font-bold transition-colors hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 sm:h-12 sm:w-12"
@@ -86,9 +86,9 @@
 			disabled={isRefreshing || appState.zipProgress.isActive}
 		>
 			{#if isRefreshing}
-				<LoaderCircle class="size-5 animate-spin sm:size-8" />
+				<LoaderCircle class="size-5 animate-spin sm:size-6" />
 			{:else}
-				<RefreshCcw class="size-5 sm:size-8" />
+				<RefreshCcw class="size-5 sm:size-6" />
 			{/if}
 		</button>
 	</div>
