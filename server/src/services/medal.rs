@@ -4,7 +4,6 @@ use reqwest;
 use serde::{Deserialize, ser::Error};
 use serde_json;
 use std::collections::HashMap;
-
 use crate::routes::metadata::Metadata;
 
 #[derive(Deserialize)]
@@ -42,12 +41,13 @@ pub async fn process_url(url: &str, client: &reqwest::Client) -> Result<Metadata
         .await
         .map_err(|e| format!("failed to get html for: {}, {}", url, e))?;
 
-    let hydration_data = extract_hydration_data(&html)?;
+    if let Ok(hydration_data) = extract_hydration_data(&html) {
+        if let Ok(metadata) = parse_hydration_data(&hydration_data) {
+            return Ok(metadata);
+        }
+    }
 
-    let metadata = parse_hydration_data(&hydration_data)
-        .map_err(|e| format!("failed to parse hydration data: {}", e))?;
-
-    Ok(metadata)
+    extract_metadata_simple(&html)
 }
 
 pub async fn get_html(url: &str, client: &reqwest::Client) -> Result<String, reqwest::Error> {
@@ -84,6 +84,52 @@ pub fn parse_hydration_data(hydration_data: &str) -> Result<Metadata, serde_json
         date,
         url: clip_data.content_url,
         thumbnail: clip_data.thumbnail_url,
+    })
+}
+
+pub fn extract_metadata_simple(html: &str) -> Result<Metadata, String> {
+    let url = html.split("\"contentUrl\":\"").nth(1)
+        .and_then(|s| s.split("\",\"").next())
+        .or_else(|| html.split("property=\"og:video:url\" content=\"").nth(1)
+            .and_then(|s| s.split("\"").next()))
+        .ok_or("no content URL found")?
+        .to_string();
+
+    let username = html.split("\"author\":{\"@type\":\"Person\",\"name\":\"").nth(1)
+        .and_then(|s| s.split("\"").next())
+        .unwrap_or("Unknown")
+        .to_string();
+
+    let title = html.split("\"name\":\"").nth(1)
+        .and_then(|s| s.split("\"").next())
+        .filter(|&name| name != "Medal" && !name.is_empty())
+        .unwrap_or("Unknown")
+        .to_string();
+
+    let game = html.split("\"keywords\":\"").nth(1)
+        .and_then(|s| s.split("\"").next())
+        .and_then(|keywords| keywords.split(',').next())
+        .map(|s| s.trim())
+        .unwrap_or("Unknown")
+        .to_string();
+
+    let date = html.split("\"uploadDate\":\"").nth(1)
+        .and_then(|s| s.split("\"").next())
+        .unwrap_or("Unknown")
+        .to_string();
+
+    let thumbnail = html.split("\"thumbnailUrl\":[\"").nth(1)
+        .and_then(|s| s.split("\"").next())
+        .unwrap_or("")
+        .to_string();
+
+    Ok(Metadata {
+        username,
+        title,
+        game,
+        date,
+        url,
+        thumbnail,
     })
 }
 
