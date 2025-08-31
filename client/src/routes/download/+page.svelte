@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { toast } from "svelte-sonner";
+	import { onMount } from "svelte";
 	import type { Video } from "$lib/types/video";
 	import { appState, settingsState } from "$lib/state/index.svelte";
 	import { fetchVideos } from "$lib/video";
@@ -8,7 +9,7 @@
 	let isLoading = $state<boolean>(false);
 	let areaFocused = $state<boolean>(false);
 
-	$effect(() => {
+	onMount(() => {
 		if (appState.validUrls.length > 0 && appState.videos.length === 0 && !isLoading) {
 			handleFetch();
 		}
