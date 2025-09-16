@@ -14,6 +14,8 @@ services:
       context: ./client
       args:
         - PUBLIC_API_URL=${PUBLIC_API_URL}
+        - PUBLIC_HOSTNAME=${PUBLIC_HOSTNAME}
+        - PUBLIC_PLAUSIBLE_URL=${PUBLIC_PLAUSIBLE_URL}
     expose:
       - "3000"
     environment:
