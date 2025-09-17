@@ -7,7 +7,7 @@ use reqwest::header::{CONTENT_TYPE, ORIGIN};
 use std::time::Duration;
 use tower_http::cors::CorsLayer;
 
-use crate::routes::{metadata::get_metadata, proxy::proxy_video};
+use crate::routes::{health::health_check, metadata::get_metadata, proxy::proxy_video};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -47,6 +47,7 @@ pub fn create_app(origin: &str) -> Router {
         );
 
     Router::new()
+        .route("/health", get(health_check))
         .route("/metadata", post(get_metadata))
         .route("/proxy", get(proxy_video))
         .with_state(state)
