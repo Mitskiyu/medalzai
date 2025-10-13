@@ -14,7 +14,7 @@ COPY . .
 RUN cargo build --release
 
 FROM alpine:latest
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache ca-certificates curl
 
 WORKDIR /app
 COPY --from=builder /app/target/release/medalzai .
@@ -22,6 +22,9 @@ COPY --from=builder /app/target/release/medalzai .
 RUN addgroup -g 1001 -S appgroup && \
     adduser -S appuser -u 1001 -G appgroup
 USER appuser
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:3000/health || exit 1
 
 EXPOSE 3000
 CMD ["./medalzai"]
