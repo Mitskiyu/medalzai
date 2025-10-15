@@ -19,6 +19,7 @@ pub fn create_app(origin: &str) -> Router {
     let state = AppState {
         metadata_client: reqwest::Client::builder()
             .timeout(Duration::from_secs(15))
+            .connect_timeout(Duration::from_secs(5))
             .pool_idle_timeout(Duration::from_secs(60))
             .pool_max_idle_per_host(10)
             .user_agent("Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Mobile Safari/537.36")
