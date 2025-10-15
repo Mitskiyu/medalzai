@@ -29,11 +29,13 @@ export function processUrls(
 		duplicateUrls = result.duplicateUrls;
 	}
 
+	const cleanText = finalUrls.join("\n");
+
 	return {
 		validUrls: finalUrls,
 		invalidUrls,
 		duplicateUrls,
-		cleanText: separatedText,
+		cleanText,
 	};
 }
 
