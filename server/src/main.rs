@@ -1,4 +1,4 @@
-use dotenv::dotenv;
+use dotenv::from_path;
 use tracing::{error, info};
 
 mod app;
@@ -9,7 +9,7 @@ mod services;
 async fn main() {
     tracing_subscriber::fmt::init();
 
-    dotenv().ok();
+    from_path("../.env").ok();
     let origin = std::env::var("ALLOWED_ORIGINS").expect("No origins variable found");
 
     info!("Starting server...");
