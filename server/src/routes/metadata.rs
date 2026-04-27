@@ -37,14 +37,14 @@ pub async fn get_metadata(
 
         async move {
             if !validate_url(&url) {
-                error!("Invalid url: {}", url);
+                error!("invalid url: {}", url);
                 return Metadata::default();
             }
 
             let _permit = match semaphore.acquire().await {
                 Ok(p) => p,
                 Err(e) => {
-                    error!("Semaphore error: {:}", e);
+                    error!("semaphore error: {:}", e);
                     return Metadata::default();
                 }
             };
@@ -52,7 +52,7 @@ pub async fn get_metadata(
             match process_url(&url, &client).await {
                 Ok(metadata) => metadata,
                 Err(e) => {
-                    error!("Failed to process {}: {:}", url, e);
+                    error!("failed to process {}: {:}", url, e);
                     Metadata::default()
                 }
             }
@@ -61,7 +61,7 @@ pub async fn get_metadata(
 
     let res = timeout(Duration::from_secs(30), join_all(futures))
         .await
-        .map_err(|_| (StatusCode::REQUEST_TIMEOUT, "Request timed out".to_string()))?;
+        .map_err(|_| (StatusCode::REQUEST_TIMEOUT, "request timed out".to_string()))?;
 
     Ok((StatusCode::OK, Json(res)))
 }

@@ -44,7 +44,7 @@ pub fn create_app(origin: &str) -> Router {
         .allow_origin(
             origin
                 .parse::<HeaderValue>()
-                .expect("Invalid origin header"),
+                .unwrap_or_else(|_| panic!("origin is not valid: {}", origin)),
         );
 
     Router::new()

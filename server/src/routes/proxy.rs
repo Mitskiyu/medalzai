@@ -23,7 +23,7 @@ pub async fn proxy_video(
         Err(e) => {
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
-                format!("Request failed: {}", e),
+                format!("request failed: {}", e),
             )
                 .into_response();
         }

@@ -1,5 +1,5 @@
 use dotenv::from_path;
-use tracing::{error, info};
+use tracing::{error, info, warn};
 
 mod app;
 mod routes;
@@ -9,18 +9,22 @@ mod services;
 async fn main() {
     tracing_subscriber::fmt::init();
 
-    from_path("../.env").ok();
-    let origin = std::env::var("ALLOWED_ORIGINS").expect("No origins variable found");
+    if from_path("../.env").is_err() {
+        warn!("no env file found, using defaults")
+    }
+
+    let origin = std::env::var("ORIGIN").expect("origin not set");
+    let port = std::env::var("ADDR").unwrap_or_else(|_| "3000".to_string());
 
     info!("Starting server...");
     let app = app::create_app(&origin);
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000")
+    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", port))
         .await
-        .expect("Failed to bind");
-    info!("Server running on 0.0.0.0:3000");
+        .expect(&format!("failed to bind to port: {}", port));
+    info!("Server running on 0.0.0.0:{}", port);
 
     if let Err(e) = axum::serve(listener, app).await {
-        error!("Server error: {:?}", e);
+        error!("error: {:#?}", e);
     }
 }
