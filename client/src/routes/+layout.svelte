@@ -8,7 +8,6 @@
 	import { Toaster } from "svelte-sonner";
 	import { appState, settingsState } from "$lib/state/index.svelte";
 	import { Navbar } from "$lib/components";
-	import { PUBLIC_HOSTNAME, PUBLIC_PLAUSIBLE_URL } from "$env/static/public";
 
 	let { children } = $props();
 	let routeId = $derived(page.route.id);
@@ -56,11 +55,6 @@
 		}
 	});
 </script>
-
-<svelte:head>
-	<script defer data-domain={PUBLIC_HOSTNAME} src={`${PUBLIC_PLAUSIBLE_URL}/js/script.js`}>
-	</script>
-</svelte:head>
 
 <div class="mx-auto min-h-screen max-w-xl px-4 pt-8 pb-4">
 	<Toaster richColors toastOptions={{ class: "whitespace-pre-line" }} />
