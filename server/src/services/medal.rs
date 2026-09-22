@@ -93,7 +93,7 @@ pub fn extract_metadata_simple(html: &str) -> Result<Metadata, String> {
         .or_else(|| html.split("property=\"og:video:url\" content=\"").nth(1)
             .and_then(|s| s.split("\"").next()))
         .ok_or("no content URL found")?
-        .to_string();
+        .replace("\\u0026", "&");
 
     let username = html.split("\"author\":{\"@type\":\"Person\",\"name\":\"").nth(1)
         .and_then(|s| s.split("\"").next())
@@ -121,7 +121,7 @@ pub fn extract_metadata_simple(html: &str) -> Result<Metadata, String> {
     let thumbnail = html.split("\"thumbnailUrl\":[\"").nth(1)
         .and_then(|s| s.split("\"").next())
         .unwrap_or("")
-        .to_string();
+        .replace("\\u0026", "&");
 
     Ok(Metadata {
         username,
