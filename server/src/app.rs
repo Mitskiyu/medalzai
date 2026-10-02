@@ -1,3 +1,5 @@
+use crate::routes::proxy::is_allowed;
+use crate::routes::{health::health_check, metadata::get_metadata, proxy::proxy_video};
 use axum::http::{HeaderValue, Method};
 use axum::{
     Router,
@@ -6,8 +8,6 @@ use axum::{
 use reqwest::header::{CONTENT_TYPE, ORIGIN};
 use std::time::Duration;
 use tower_http::cors::CorsLayer;
-
-use crate::routes::{health::health_check, metadata::get_metadata, proxy::proxy_video};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -33,6 +33,13 @@ pub fn create_app(origin: &str) -> Router {
             .no_gzip()
             .no_brotli()
             .no_deflate()
+            .redirect(reqwest::redirect::Policy::custom(|attempt| {
+                if attempt.previous().len() < 5 && is_allowed(attempt.url().as_str()) {
+                    attempt.follow()
+                } else {
+                    attempt.stop()
+                }
+            }))
             .user_agent("Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Mobile Safari/537.36")
             .build()
             .expect("Proxy client failed to build"),

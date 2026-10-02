@@ -5,9 +5,12 @@ use axum::{
     response::IntoResponse,
 };
 use futures::stream;
+use reqwest::Url;
 use serde::Deserialize;
 
 use crate::app::AppState;
+
+const ALLOWED_HOSTS: &[&str] = &["cdn.medal.tv"];
 
 #[derive(Deserialize)]
 pub struct VideoQuery {
@@ -18,6 +21,11 @@ pub async fn proxy_video(
     State(state): State<AppState>,
     Query(query): Query<VideoQuery>,
 ) -> impl IntoResponse {
+    if !is_allowed(&query.url) {
+        tracing::warn!("rejected proxy url: {}", query.url);
+        return (StatusCode::BAD_REQUEST, "url not allowed").into_response();
+    }
+
     let resp = match state.proxy_client.get(&query.url).send().await {
         Ok(res) => res,
         Err(e) => {
@@ -64,4 +72,13 @@ pub async fn proxy_video(
     });
 
     (status, headers, Body::from_stream(stream)).into_response()
+}
+
+pub fn is_allowed(raw: &str) -> bool {
+    let Ok(url) = Url::parse(raw) else {
+        return false;
+    };
+    url.scheme() == "https"
+        && url.port().is_none()
+        && url.host_str().is_some_and(|h| ALLOWED_HOSTS.contains(&h))
 }
