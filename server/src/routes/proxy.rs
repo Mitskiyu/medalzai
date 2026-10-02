@@ -38,6 +38,18 @@ pub async fn proxy_video(
     };
 
     let status = resp.status();
+    if status.is_success() {
+        let db = state.stats.clone();
+        tokio::task::spawn_blocking(move || {
+            if let Ok(conn) = db.lock() {
+                let _ = conn.execute(
+                    "INSERT INTO daily_clips (day, clips) VALUES (date('now'), 1)
+                 ON CONFLICT(day) DO UPDATE SET clips = clips + 1",
+                    [],
+                );
+            }
+        });
+    }
 
     let mut headers = HeaderMap::new();
 

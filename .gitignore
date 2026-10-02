@@ -10,6 +10,7 @@ node_modules
 build
 tmp/
 target/
+stats.db
 
 # os
 .DS_Store

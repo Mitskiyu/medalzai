@@ -6,6 +6,8 @@ use axum::{
     routing::{get, post},
 };
 use reqwest::header::{CONTENT_TYPE, ORIGIN};
+use rusqlite::Connection;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tower_http::cors::CorsLayer;
 
@@ -13,9 +15,18 @@ use tower_http::cors::CorsLayer;
 pub struct AppState {
     pub metadata_client: reqwest::Client,
     pub proxy_client: reqwest::Client,
+    pub stats: Arc<Mutex<Connection>>,
 }
 
 pub fn create_app(origin: &str) -> Router {
+    let path = std::env::var("SQLITE").unwrap_or_else(|_| "stats.db".to_string());
+    let conn = Connection::open(&path).expect("failed to open sqlite");
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS daily_clips (day TEXT PRIMARY KEY, clips INTEGER NOT NULL)",
+        [],
+    )
+    .expect("failed to create table");
+
     let state = AppState {
         metadata_client: reqwest::Client::builder()
             .timeout(Duration::from_secs(15))
@@ -43,6 +54,7 @@ pub fn create_app(origin: &str) -> Router {
             .user_agent("Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Mobile Safari/537.36")
             .build()
             .expect("Proxy client failed to build"),
+        stats: Arc::new(Mutex::new(conn))
     };
 
     let cors = CorsLayer::new()
