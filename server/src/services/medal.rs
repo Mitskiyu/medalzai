@@ -1,10 +1,10 @@
 #![allow(dead_code)]
+use crate::routes::metadata::Metadata;
 use chrono::DateTime;
 use reqwest;
 use serde::{Deserialize, ser::Error};
 use serde_json;
 use std::collections::HashMap;
-use crate::routes::metadata::Metadata;
 
 #[derive(Deserialize)]
 struct HydrationData {
@@ -36,8 +36,27 @@ struct ClipData {
     created: i64,
 }
 
+pub fn normalize_url(url: &str) -> String {
+    let Some(path_start) = url.find("medal.tv/") else {
+        return url.to_string();
+    };
+    let path = &url[path_start + "medal.tv/".len()..];
+    let path = path.split('?').next().unwrap_or(path);
+    let path = path.split('#').next().unwrap_or(path);
+    let segs: Vec<&str> = path.split('/').collect();
+
+    if let Some(i) = segs.iter().position(|&s| s == "clips") {
+        if i + 1 < segs.len() {
+            return format!("https://medal.tv/{}", segs[..=i + 1].join("/"));
+        }
+    }
+
+    format!("https://medal.tv/{}", path)
+}
+
 pub async fn process_url(url: &str, client: &reqwest::Client) -> Result<Metadata, String> {
-    let html = get_html(url, client)
+    let url = normalize_url(url);
+    let html = get_html(&url, client)
         .await
         .map_err(|e| format!("failed to get html for: {}, {}", url, e))?;
 
@@ -88,37 +107,52 @@ pub fn parse_hydration_data(hydration_data: &str) -> Result<Metadata, serde_json
 }
 
 pub fn extract_metadata_simple(html: &str) -> Result<Metadata, String> {
-    let url = html.split("\"contentUrl\":\"").nth(1)
+    let url = html
+        .split("\"contentUrl\":\"")
+        .nth(1)
         .and_then(|s| s.split("\",\"").next())
-        .or_else(|| html.split("property=\"og:video:url\" content=\"").nth(1)
-            .and_then(|s| s.split("\"").next()))
+        .or_else(|| {
+            html.split("property=\"og:video:url\" content=\"")
+                .nth(1)
+                .and_then(|s| s.split("\"").next())
+        })
         .ok_or("no content URL found")?
         .replace("\\u0026", "&");
 
-    let username = html.split("\"author\":{\"@type\":\"Person\",\"name\":\"").nth(1)
+    let username = html
+        .split("\"author\":{\"@type\":\"Person\",\"name\":\"")
+        .nth(1)
         .and_then(|s| s.split("\"").next())
         .unwrap_or("Unknown")
         .to_string();
 
-    let title = html.split("\"name\":\"").nth(1)
+    let title = html
+        .split("\"name\":\"")
+        .nth(1)
         .and_then(|s| s.split("\"").next())
         .filter(|&name| name != "Medal" && !name.is_empty())
         .unwrap_or("Unknown")
         .to_string();
 
-    let game = html.split("\"keywords\":\"").nth(1)
+    let game = html
+        .split("\"keywords\":\"")
+        .nth(1)
         .and_then(|s| s.split("\"").next())
         .and_then(|keywords| keywords.split(',').next())
         .map(|s| s.trim())
         .unwrap_or("Unknown")
         .to_string();
 
-    let date = html.split("\"uploadDate\":\"").nth(1)
+    let date = html
+        .split("\"uploadDate\":\"")
+        .nth(1)
         .and_then(|s| s.split("\"").next())
         .unwrap_or("Unknown")
         .to_string();
 
-    let thumbnail = html.split("\"thumbnailUrl\":[\"").nth(1)
+    let thumbnail = html
+        .split("\"thumbnailUrl\":[\"")
+        .nth(1)
         .and_then(|s| s.split("\"").next())
         .unwrap_or("")
         .replace("\\u0026", "&");
