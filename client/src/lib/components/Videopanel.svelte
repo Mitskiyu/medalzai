@@ -55,7 +55,7 @@
 			>
 				<div class="mb-4.5 flex min-w-0 flex-1 flex-col gap-y-0.25 text-[0.5rem] text-white/80">
 					<h2>{video.username}</h2>
-					<h2>{video.game}</h2>
+					<h2>{video.game.replace(/\b\w/g, c => c.toUpperCase())}</h2>
 				</div>
 			</div>
 
@@ -96,7 +96,7 @@
 				<div class="mt-2 flex h-8 items-start justify-between">
 					<div class="flex min-w-0 flex-1 flex-col gap-y-0.5 text-sm text-white/70">
 						<h2>{video.username}</h2>
-						<h2>{video.game}</h2>
+						<h2>{video.game.replace(/\b\w/g, c => c.toUpperCase())}</h2>
 					</div>
 					<button
 						class="bg-medal-lime text-medal-black ml-3 flex size-10 items-center justify-center gap-2 rounded-3xl p-2 text-sm font-bold transition-colors hover:cursor-pointer hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40"
