@@ -57,6 +57,7 @@
 		}
 
 		isLoading = true;
+		const loadStart = Date.now();
 
 		if (refresh) {
 			appState.videos = [];
@@ -85,6 +86,9 @@
 			toast.error("Something went wrong, try again later");
 			console.error("Failed to fetch videos: ", error);
 		} finally {
+			const elapsed = Date.now() - loadStart;
+			const remaining = 600 - elapsed;
+			if (remaining > 0) await new Promise((r) => setTimeout(r, remaining));
 			isLoading = false;
 		}
 	}
@@ -110,6 +114,7 @@
 		<Linkarea
 			bind:inputText={appState.inputText}
 			bind:areaFocused
+			{isLoading}
 			onAreaChange={handleAreaChange}
 			onInvalidUrl={handleInvalidUrl}
 			onDuplicatesRemoved={handleDuplicatesRemoved}
